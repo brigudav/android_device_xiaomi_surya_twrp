@@ -1,0 +1,45 @@
+# Android fstab file.
+# The filesystem that contains the filesystem checker binary (typically /system) cannot
+# specify MF_CHECK, and must come before any filesystems that do specify MF_CHECK
+
+# mount point fstype  device        device2          flags
+
+/system_root   ext4   /dev/block/mapper/system
+/system_ext    ext4   /dev/block/mapper/system_ext
+/vendor        ext4   /dev/block/mapper/vendor
+/product       ext4   /dev/block/mapper/product
+/metadata      ext4   /dev/block/sda10       flags=display="Metadata";wrappedkey
+/boot          emmc   /dev/block/sde46
+/dtbo          emmc   /dev/block/sde47       flags=display="DTBO";backup=1;flashimg
+/recovery      emmc   /dev/block/sda8        flags=backup=1;flashimg
+/firmware      vfat   /dev/block/sde4        flags=display="Firmware";mounttodecrypt;fsflags=ro
+/modem_image   emmc   /dev/block/sde4        flags=backup=1;display="Modem";flashimg
+/bluetooth     emmc   /dev/block/sde5        flags=backup=1;display="Bluetooth";flashimg
+/abl           emmc   /dev/block/sde8        flags=display="Firmware-update";backup=1
+/aop           emmc   /dev/block/sde1        flags=backup=1;subpartitionof=/abl
+/cmnlib        emmc   /dev/block/sde11       flags=backup=1;subpartitionof=/abl
+/cmnlib64      emmc   /dev/block/sde12       flags=backup=1;subpartitionof=/abl
+/devcfg        emmc   /dev/block/sde13       flags=backup=1;subpartitionof=/abl
+/qupfw         emmc   /dev/block/sde14       flags=backup=1;subpartitionof=/abl
+/keymaster     emmc   /dev/block/sde10       flags=backup=1;subpartitionof=/abl
+/imagefv       emmc   /dev/block/sde15       flags=backup=1;subpartitionof=/abl
+/hyp           emmc   /dev/block/sde3        flags=backup=1;subpartitionof=/abl
+/xbl           emmc   /dev/block/sdb1        flags=backup=1;subpartitionof=/abl
+/xbl_config    emmc   /dev/block/sdb2        flags=backup=1;subpartitionof=/abl
+/storsec       emmc   /dev/block/sde38       flags=backup=1;subpartitionof=/abl
+/tz            emmc   /dev/block/sde2        flags=backup=1;subpartitionof=/abl
+/dsp           emmc   /dev/block/sde9        flags=backup=1;subpartitionof=/abl
+/persist       ext4   /dev/block/sda2        flags=backup=1
+/persist_image emmc   /dev/block/sda2        flags=flashimg
+/cust          ext4   /dev/block/sda7        flags=backup=1
+/cust_image    emmc   /dev/block/sda7        flags=backup=0;flashimg
+/storage       f2fs   /data/media/0          flags=display="Internal Storage";usermrf;backup=1;fsflags="bind";removable
+/efs1          emmc   /dev/block/sdf2        flags=backup=1;display=EFS
+/efs2          emmc   /dev/block/sdf3        flags=backup=1;subpartitionof=/efs1
+/efsg          emmc   /dev/block/sdf4        flags=backup=1;subpartitionof=/efs1
+/efsc          emmc   /dev/block/sdf5        flags=backup=1;subpartitionof=/efs1
+/vbmeta        emmc   /dev/block/sde45       flags=backup=1;display="Vbmeta"
+/vbmeta_system emmc   /dev/block/sda9        flags=backup=1;subpartitionof=/vbmeta
+# Removable storage
+/external_sd   vfat   /dev/block/mmcblk0p1 /dev/block/mmcblk0 flags=fsflags=utf8;display="MicroSD";storage;wipeingui;removable
+/usb-otg       vfat   /dev/block/sdg1      /dev/block/sdg     flags=fsflags=utf8;storage;wipeingui;removable
