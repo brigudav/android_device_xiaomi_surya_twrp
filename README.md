@@ -1,7 +1,7 @@
 # android_device_xiaomi_surya_twrp
-For building TWRP for POCO X3
+For building TWRP for POCO X3 / X3 NFC (codenamed "karna / surya")
 
-TWRP device tree for POCO X3
+TWRP device tree for POCO X3 (karna/surya)
 
 ## Features
 
