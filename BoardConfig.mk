@@ -15,7 +15,6 @@
 #
 
 # Bootloader
-
 TARGET_BOOTLOADER_BOARD_NAME := sm6150
 TARGET_NO_BOOTLOADER := true
 TARGET_USES_UEFI := true
@@ -127,7 +126,6 @@ TW_INCLUDE_FUSE_EXFAT := true
 # NTFS Support
 TW_INCLUDE_FUSE_NTFS := true
 
-
 # Use mke2fs to create ext4 images
 TARGET_USES_MKE2FS := true
 
@@ -135,6 +133,14 @@ TARGET_USES_MKE2FS := true
 TARGET_RECOVERY_DEVICE_MODULES += ashmemd
 TW_RECOVERY_ADDITIONAL_RELINK_BINARY_FILES += \
     $(TARGET_OUT_EXECUTABLES)/ashmemd
+
+TARGET_RECOVERY_DEVICE_MODULES += \
+    ashmemd_aidl_interface-cpp \
+    libashmemd_client
+
+TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
+    $(TARGET_OUT_SHARED_LIBRARIES)/ashmemd_aidl_interface-cpp.so \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libashmemd_client.so
 
 # Crypto
 PLATFORM_SECURITY_PATCH := 2021-05-01
@@ -162,7 +168,6 @@ TW_USE_TOOLBOX := true
 TW_INCLUDE_RESETPROP := true
 TW_EXCLUDE_TWRPAPP := true
 
-
 # Debug flags
 TWRP_INCLUDE_LOGCAT := true
 TARGET_USES_LOGD := true
@@ -172,4 +177,3 @@ TARGET_USE_CUSTOM_LUN_FILE_PATH := "/config/usb_gadget/g1/functions/mass_storage
 
 # The path to a temperature sensor
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone19/temp"
-
