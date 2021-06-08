@@ -16,6 +16,7 @@ Works:
 - Flashing (opengapps, roms, images and so on)
 - Backup/Restore
 - USB OTG
+- Fasbootd
 
 ## Compile
 
