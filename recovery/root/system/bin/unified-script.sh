@@ -30,7 +30,7 @@ load_karna()
 hwname=$(getprop ro.boot.hwname)
 echo $hwname
 
-case $project in
+case $hwname in
     "karna")
         load_karna
         ;;
