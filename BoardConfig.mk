@@ -151,6 +151,11 @@ TW_INCLUDE_FBE_METADATA_DECRYPT := true
 BOARD_USES_METADATA_PARTITION := true
 PLATFORM_VERSION := 16.1.0
 
+# fix miui a11 decryption
+BOARD_AVB_RECOVERY_ADD_HASH_FOOTER_ARGS += \
+    --prop com.android.build.boot.os_version:$(PLATFORM_VERSION) \
+    --prop com.android.build.boot.security_patch:$(PLATFORM_SECURITY_PATCH)
+
 # TWRP specific build flags
 TW_THEME := portrait_hdpi
 TARGET_RECOVERY_PIXEL_FORMAT := "BGRA_8888"
