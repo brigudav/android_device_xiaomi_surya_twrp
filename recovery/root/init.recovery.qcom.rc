@@ -56,17 +56,6 @@ service vibrator-service /system/bin/vendor.qti.hardware.vibrator@1.2-service
     disabled
     seclabel u:r:recovery:s0
 
-service unified-script /system/bin/unified-script.sh
-    user root
-    group root
-    disabled
-    oneshot
-    seclabel u:r:recovery:s0
-
-on boot
-    chmod 0777 /system/bin/unified-script.sh
-    start unified-script
-
 on property:crypto.ready=0
     stop sbinqseecomd
     stop keymaster-4-0
