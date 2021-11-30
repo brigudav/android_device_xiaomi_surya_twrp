@@ -31,7 +31,7 @@ PRODUCT_PACKAGES += \
     fastbootd
 
 # OEM otacert
-PRODUCT_EXTRA_RECOVERY_KEYS += \
+#PRODUCT_EXTRA_RECOVERY_KEYS += \
 	 vendor/recovery/security/miui
 
 PRODUCT_COPY_FILES += \
