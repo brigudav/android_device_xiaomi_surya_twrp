@@ -20,24 +20,24 @@ Works:
 
 ## Compile
 
-First checkout minimal twrp with omnirom tree:
+First checkout minimal twrp with aosp tree:
 
 ```
-repo init -u git://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git -b twrp-10.0
+repo init -u git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
 repo sync
 ```
 
 Then add these projects to .repo/manifest.xml:
 
 ```xml
-<project path="device/xiaomi/surya" name="brigudav/android_device_xiaomi_surya_twrp" remote="github" revision="android-10" />
+<project path="device/xiaomi/surya" name="brigudav/android_device_xiaomi_surya_twrp" remote="github" revision="android-11" />
 ```
 
 Finally execute these:
 
 ```
 . build/envsetup.sh
-lunch omni_surya-eng
+lunch twrp_surya-eng
 mka recoveryimage ALLOW_MISSING_DEPENDENCIES=true # Only if you use minimal twrp tree.
 ```
 

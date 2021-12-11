@@ -14,26 +14,22 @@
 # limitations under the License.
 #
 
-# Inherit from common AOSP config
-$(call inherit-product, $(SRC_TARGET_DIR)/product/aosp_base.mk)
-
-# Display
-TARGET_SCREEN_HEIGHT := 2400
-TARGET_SCREEN_WIDTH := 1080
-
-# Dynamic
-PRODUCT_USE_DYNAMIC_PARTITIONS := true
+# Define hardware platform
+PRODUCT_PLATFORM := sm6150
 
 # Fastbootd
 PRODUCT_PACKAGES += \
-    android.hardware.fastboot@1.0-impl-mock \
-    android.hardware.fastboot@1.0-impl-mock.recovery \
-    fastbootd
+	android.hardware.fastboot@1.0-impl-mock \
+	android.hardware.fastboot@1.0-impl-mock.recovery \
+	fastbootd
 
-# OEM otacert
-#PRODUCT_EXTRA_RECOVERY_KEYS += \
-	 vendor/recovery/security/miui
+# API
+PRODUCT_SHIPPING_API_LEVEL := 29
 
-PRODUCT_COPY_FILES += \
-    $(OUT_DIR)/target/product/surya/obj/SHARED_LIBRARIES/libandroidicu_intermediates/libandroidicu.so:$(TARGET_COPY_OUT_RECOVERY)/root/system/lib64/libandroidicu.so
+# Soong namespaces
+PRODUCT_SOONG_NAMESPACES += \
+	$(DEVICE_PATH)
+
+# Dynamic partitions
+PRODUCT_USE_DYNAMIC_PARTITIONS := true
 

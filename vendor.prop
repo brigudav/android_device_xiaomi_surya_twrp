@@ -1,0 +1,4 @@
+vendor.gatekeeper.disable_spu=true
+ro.crypto.volume.filenames_mode=aes-256-cts
+fbe.metadata.wrappedkey=true
+
