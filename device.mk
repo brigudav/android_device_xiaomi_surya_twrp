@@ -33,3 +33,19 @@ PRODUCT_SOONG_NAMESPACES += \
 # Dynamic partitions
 PRODUCT_USE_DYNAMIC_PARTITIONS := true
 
+# Apex libraries
+TARGET_RECOVERY_DEVICE_MODULES += \
+    libandroidicu
+
+PRODUCT_COPY_FILES += \
+    $(OUT_DIR)/target/product/$(PRODUCT_RELEASE_NAME)/obj/SHARED_LIBRARIES/libandroidicu_intermediates/libandroidicu.so:$(TARGET_COPY_OUT_RECOVERY)/root/system/lib64/libandroidicu.so
+
+# Additional binaries & libraries needed for recovery
+TARGET_RECOVERY_DEVICE_MODULES += \
+    libion \
+    libxml2
+
+TW_RECOVERY_ADDITIONAL_RELINK_LIBRARY_FILES += \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libion.so \
+    $(TARGET_OUT_SHARED_LIBRARIES)/libxml2.so
+
