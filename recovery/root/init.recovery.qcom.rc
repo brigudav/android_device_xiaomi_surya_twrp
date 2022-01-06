@@ -97,9 +97,6 @@ service vibrator-service /vendor/bin/vendor.qti.hardware.vibrator@1.2-service
 
 on boot
     start vibrator-service
-    start health-hal-2-0
-    start boot-hal-1-0
-    setprop sys.usb.config adb
 
 on property:crypto.ready=0
     stop vendor.qseecomd
