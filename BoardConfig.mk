@@ -164,7 +164,7 @@ TW_EXCLUDE_DEFAULT_USB_INIT := true
 #TW_EXTRA_LANGUAGES := true
 TW_INCLUDE_NTFS_3G := true
 TW_USE_TOOLBOX := true
-TW_INPUT_BLACKLIST := "hbtp_vm"
+#TW_INPUT_BLACKLIST := "hbtp_vm"
 TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
 TW_DEFAULT_BRIGHTNESS := 1200
 TW_Y_OFFSET := 91
@@ -184,4 +184,6 @@ TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone19/temp"
 # TWRP Debug Flags
 TARGET_USES_LOGD := true
 TWRP_INCLUDE_LOGCAT := true
+
+TW_QCOM_ATS_OFFSET := 1643101352000
 
