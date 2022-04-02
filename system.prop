@@ -1,11 +1,2 @@
-ro.product.vendor.marketname=POCO X3 NFC
-ro.product.device=surya
-ro.product.board=surya
-ro.board.platform=sm6150
-sys.usb.controller=a600000.dwc3
-sys.usb.rndis.func.name=rndis_bam
-sys.usb.rmnet.func.name=rmnet_bam
-persist.sys.isUsbOtgEnabled=true
-ro.boot.dynamic_partitions=true
-ro.adb.secure=0
-
+vendor.gatekeeper.disable_spu=true
+fbe.metadata.wrappedkey=true
