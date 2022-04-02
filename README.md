@@ -11,21 +11,24 @@ Works:
 - [X] Decryption of /data
 - [X] Screen brightness settings
 - [X] Vibration support
-- [X] Correct screenshot color
+- [X] Correct screenshot
+- [X] Correct date/battery level/temperature
 - [X] MTP
 - [X] Flashing (opengapps, roms, images and so on)
-- [X] Backup/Restore
+- [X] Backup/Restore to internal/microSD
+- [X] Backup/Restore to/from adb (https://gerrit.omnirom.org/#/c/15943/)
 - [X] USB OTG
 - [X] Fasbootd
-- [X] update.zip sideload
-- [X] backup/restore to/from adb
+- [X] Sideload (adb sideload update.zip)
+- [X] Reboot to bootloader/recovery/system/fasbootd
+- [X] F2FS/EXT4 Support, exFAT/NTFS where supported
 
 ## Compile
 
 First checkout minimal twrp with aosp tree:
 
 ```
-repo init -u git://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
+repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
 repo sync
 ```
 
