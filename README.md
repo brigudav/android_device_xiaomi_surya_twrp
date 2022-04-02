@@ -7,16 +7,18 @@ TWRP device tree for POCO X3 (karna/surya)
 
 Works:
 
-- ADB
-- Decryption of /data
-- Screen brightness settings
-- Vibration support
-- Correct screenshot color
-- MTP
-- Flashing (opengapps, roms, images and so on)
-- Backup/Restore
-- USB OTG
-- Fasbootd
+- [X] ADB
+- [X] Decryption of /data
+- [X] Screen brightness settings
+- [X] Vibration support
+- [X] Correct screenshot color
+- [X] MTP
+- [X] Flashing (opengapps, roms, images and so on)
+- [X] Backup/Restore
+- [X] USB OTG
+- [X] Fasbootd
+- [X] update.zip sideload
+- [X] backup/restore to/from adb
 
 ## Compile
 
