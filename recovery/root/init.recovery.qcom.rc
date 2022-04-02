@@ -1,44 +1,14 @@
-#
-# Copyright (C) 2021 The TWRP Open-Source Project
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
-    chmod 0660 /dev/qseecom
-    chown system drmrpc /dev/qseecom
-    chmod 0664 /dev/ion
-    chown system system /dev/ion
     install_keyring
 
-on early-fs
-    start vold
-
 on init
-    mkdir /tmp/install
-    mkdir /tmp/install/bin
-
-    start hwservicemanager
     setprop crypto.ready 1
 
 service vendor.qseecomd /vendor/bin/qseecomd
     user root
     group root
-    disabled
-    seclabel u:r:recovery:s0
-
-service hwservicemanager /system/bin/hwservicemanager
-    user root
-    group root
-    disabled
-    onrestart setprop hwservicemanager.ready false
-    seclabel u:r:recovery:s0
-
-service servicemanager /system/bin/servicemanager
-    user root
-    group root readproc
     disabled
     seclabel u:r:recovery:s0
 
@@ -76,6 +46,7 @@ service vibrator-service /vendor/bin/vendor.qti.hardware.vibrator@1.2-service
 
 on boot
     start vibrator-service
+    start health-hal-2-1
 
 on property:crypto.ready=0
     stop vendor.qseecomd
@@ -90,4 +61,3 @@ on property:vendor.sys.listeners.registered=true
     start keymaster-4-0
     start gatekeeper-1-0
     start servicemanager
-
