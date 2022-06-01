@@ -35,14 +35,27 @@ on:
         description: 'DEVICE_TYPE'
         required: true
         default: 'recovery'
+        type: choice
+        options:
+        - recovery
+        - boot
+        - vendorboot
       UPLOAD:
         description: 'Upload to Telegram'
         required: true
-        default: 'true'
+        default: 'yes'
+        type: choice
+        options:
+        - yes
+        - no
       PUBLISH:
         description: 'Publish to GITHUB'
         required: true
-        default: 'true'
+        default: 'yes'
+        type: choice
+        options:
+        - yes
+        - no
 
 jobs:
   build:
