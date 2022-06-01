@@ -7,6 +7,10 @@ on:
         description: 'MANIFEST_TYPE'
         required: true
         default: 'twrp'
+        type: choice
+        options:
+        - twrp
+        - omni
       MANIFEST_URL:
         description: 'MANIFEST_URL'
         required: true
@@ -15,6 +19,10 @@ on:
         description: 'MANIFEST_BRANCH'
         required: true
         default: 'twrp-11'
+        type: choice
+        options:
+        - twrp-11
+        - twrp-12.1
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
