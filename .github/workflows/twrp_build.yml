@@ -145,7 +145,7 @@ jobs:
 
     - name: Add img to zip
       run: |
-        cd ${{steps.var.outputs.Outdir}}
+        cd ${{ steps.var.outputs.Outdir }}
         zip -9 twrp-${{ github.event.inputs.DEVICE_NAME }}-${{ steps.var.outputs.date }}.zip ${{ github.event.inputs.DEVICE_TYPE }}.img
         echo "::set-output name=name::$(find * -name *.zip -type f)"
       id: zipname
@@ -154,7 +154,7 @@ jobs:
       if: github.event.inputs.UPLOAD == 'true'
       run: |
         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage -d text="<b>- Build for </b><i>${{ github.event.inputs.DEVICE_NAME }}</i> <b>completed%0A- End Time: </b><i>$(TZ=Australia/Sydney date +"%Y-%m-%d"-%H:%M:%S)</i>" -d chat_id=${{ secrets.TELEGRAM_TO }} -d parse_mode=HTML
-        ZIP=${{steps.var.outputs.Outdir}}/${{ steps.zipname.outputs.name }}
+        ZIP=${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
         curl https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument \
           -X POST \
           -F chat_id="${{ secrets.TELEGRAM_TO }}" \
@@ -165,7 +165,7 @@ jobs:
       if: github.event.inputs.PUBLISH == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        files: ${{steps.var.outputs.Outdir}}/${{ steps.zipname.outputs.name }}
+        files: ${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
         name: ${{ steps.zipname.outputs.name }}-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
         body: Recovery for ${{ github.event.inputs.DEVICE_NAME }}
