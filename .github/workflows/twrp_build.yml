@@ -1,4 +1,4 @@
-name: Make Surya Recovery
+name: Build TWRP
 
 on:
   workflow_dispatch:
@@ -49,7 +49,7 @@ on:
         - boot
         - vendorboot
       UPLOAD:
-        description: 'Upload to Telegram'
+        description: 'Upload to Telegram (true or false)'
         required: true
         default: 'yes'
         type: choice
@@ -57,7 +57,7 @@ on:
         - yes
         - no
       PUBLISH:
-        description: 'Publish to GITHUB'
+        description: 'Publish to GitHub (true or false)'
         required: true
         default: 'yes'
         type: choice
@@ -90,11 +90,6 @@ jobs:
         sudo apt update
         sudo apt -y upgrade
         sudo apt -y install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc unzip jq bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf lib32ncurses5-dev lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev imagemagick libbz2-dev libssl-dev lzma ncftp bash-completion python openjdk-8-jdk qemu-user-static
-
-    - name: Set variables
-      run: |
-        echo "::set-output name=date::$(date +%F)"
-      id: var
 
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
@@ -142,9 +137,15 @@ jobs:
         make clean
         make ${{ github.event.inputs.DEVICE_TYPE }}image -j$(nproc --all)
 
+    - name: Set variables
+      run: |
+        echo "::set-output name=date::$(date +%F)"
+        echo "::set-output name=Outdir::"${{ steps.pwd.outputs.pwd }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}""
+      id: var
+
     - name: Add img to zip
       run: |
-        cd ${{ steps.pwd.outputs.pwd }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        cd ${{steps.var.outputs.Outdir}}
         zip -9 twrp-${{ github.event.inputs.DEVICE_NAME }}-${{ steps.var.outputs.date }}.zip ${{ github.event.inputs.DEVICE_TYPE }}.img
         echo "::set-output name=name::$(find * -name *.zip -type f)"
       id: zipname
@@ -153,7 +154,7 @@ jobs:
       if: github.event.inputs.UPLOAD == 'true'
       run: |
         curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage -d text="<b>- Build for </b><i>${{ github.event.inputs.DEVICE_NAME }}</i> <b>completed%0A- End Time: </b><i>$(TZ=Australia/Sydney date +"%Y-%m-%d"-%H:%M:%S)</i>" -d chat_id=${{ secrets.TELEGRAM_TO }} -d parse_mode=HTML
-        ZIP=workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ steps.zipname.outputs.name }}
+        ZIP=${{steps.var.outputs.Outdir}}/${{ steps.zipname.outputs.name }}
         curl https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendDocument \
           -X POST \
           -F chat_id="${{ secrets.TELEGRAM_TO }}" \
@@ -164,7 +165,7 @@ jobs:
       if: github.event.inputs.PUBLISH == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        files: workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ steps.zipname.outputs.name }}
+        files: ${{steps.var.outputs.Outdir}}/${{ steps.zipname.outputs.name }}
         name: ${{ steps.zipname.outputs.name }}-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
         body: Recovery for ${{ github.event.inputs.DEVICE_NAME }}
