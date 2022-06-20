@@ -157,13 +157,12 @@ jobs:
         CHAT_ID: ${{ secrets.TELEGRAM_TO }}
         BOT_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
       run: |
-        export ZIP=${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
-        export CAPTION=\
-        *- Device:* ${{ github.event.inputs.DEVICE_NAME }}'\n'\
-        *- Time:* $(TZ=Australia/Sydney date +"%Y-%m-%d"-%H:%M:%S)'\n'\
-        *- Actor:* ${{ github.actor }}'\n'\
-        *- Build:* Test A-12
-        curl -F document=@ZIP -F "caption=${CAPTION}" "https://api.telegram.org/bot${BOT_TOKEN}/sendDocument?chat_id=${CHAT_ID}&parse_mode=Markdown"
+        curl https://api.telegram.org/bot$BOT_TOKEN/sendDocument \
+        -F chat_id=$CHAT_ID \
+        -F disable_notification=true \
+        -F parse_mode=HTML \
+        -F caption=" <b>- Build for <i>${{ github.event.inputs.DEVICE_NAME }}</i> completed.</b> " \
+        -F document=@${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
 
     - name: Publish to GitHub
       if: github.event.inputs.PUBLISH == 'true'
