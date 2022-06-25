@@ -8,7 +8,7 @@ TWRP device tree for POCO X3 (karna/surya)
 Works:
 
 - [X] ADB
-- [ ] Decryption of /data
+- [X] Decryption of /data (MIUI A11/Custom rom A12.1)
 - [X] Screen brightness settings
 - [X] Vibration support
 - [X] Correct screenshot
