@@ -1,5 +1,6 @@
 #
-# Copyright (C) 2021 The TWRP Open-Source Project
+# Copyright 2018 The Android Open Source Project
+# Copyright 2014-2022 The Team Win LLC
 #
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -173,10 +174,6 @@ TW_NO_SCREEN_BLANK := true
 TW_EXCLUDE_APEX := true
 TW_SUPPORT_INPUT_1_2_HAPTICS := true
 
-# TWRP tools
-TW_INCLUDE_RESETPROP := true
-TW_INCLUDE_REPACKTOOLS := true
-
 # The path to a temperature sensor
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone19/temp"
 
@@ -186,6 +183,10 @@ TWRP_INCLUDE_LOGCAT := true
 
 TW_QCOM_ATS_OFFSET := 1643101352000
 
-#TW_EXCLUDE_LPDUMP := true
-#TW_EXCLUDE_LPTOOLS := true
+# TWRP tools
+TW_INCLUDE_RESETPROP := true
+TW_INCLUDE_REPACKTOOLS := true
+TW_EXCLUDE_LPDUMP := true
+TW_EXCLUDE_LPTOOLS := true
 TW_INCLUDE_PYTHON := true
+
