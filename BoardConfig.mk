@@ -5,9 +5,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# Default device path
-DEVICE_PATH := device/$(BOARD_VENDOR)/$(TARGET_DEVICE)
-
 # Broken rules
 BUILD_BROKEN_DUP_RULES := true
 BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
@@ -22,8 +19,6 @@ TARGET_USES_UEFI := true
 TARGET_BOARD_PLATFORM := sm6150
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno618
 QCOM_BOARD_PLATFORMS += sm6150
-
-TARGET_SUPPORTS_64_BIT_APPS := true
 
 # Architecture
 TARGET_ARCH := arm64
@@ -110,17 +105,6 @@ BOARD_MAIN_PARTITION_LIST := \
 	vendor \
 	product
 
-# System as root
-BOARD_ROOT_EXTRA_FOLDERS += \
-	bluetooth \
-	cache \
-	bt_firmware \
-	dsp \
-	firmware \
-	persist \
-	cust
-BOARD_SUPPRESS_SECURE_ERASE := true
-
 # File systems
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
@@ -135,9 +119,6 @@ TARGET_COPY_OUT_VENDOR := vendor
 
 # Extras props
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
-
-# Assert
-TARGET_OTA_ASSERT_DEVICE := $(PRODUCT_RELEASE_NAME)
 
 # Crypto
 PLATFORM_VERSION := 127
