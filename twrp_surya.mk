@@ -13,10 +13,6 @@ PRODUCT_RELEASE_NAME := $(lastword $(subst /, ,$(lastword $(subst _, ,$(firstwor
 # Custom vendor used in build tree (automatically taken from this file's prefix)
 CUSTOM_VENDOR := $(lastword $(subst /, ,$(firstword $(subst _, ,$(firstword $(MAKEFILE_LIST))))))
 
-# Inherit from those products. Most specific first.
-$(call inherit-product, $(SRC_TARGET_DIR)/product/core_64_bit.mk)
-$(call inherit-product, $(SRC_TARGET_DIR)/product/base.mk)
-
 # Inherit from our custom product configuration
 $(call inherit-product, vendor/$(CUSTOM_VENDOR)/config/common.mk)
 
@@ -30,6 +26,8 @@ PRODUCT_BRAND := POCO
 PRODUCT_MODEL := POCO X3
 PRODUCT_MANUFACTURER := $(BOARD_VENDOR)
 
+# Device path for OEM device tree
+DEVICE_PATH := device/$(BOARD_VENDOR)/$(PRODUCT_DEVICE)
+
 # Inherit from hardware-specific part of the product configuration
-$(call inherit-product, device/$(BOARD_VENDOR)/$(PRODUCT_DEVICE)/device.mk)
-#
+$(call inherit-product, $(DEVICE_PATH)/device.mk)
