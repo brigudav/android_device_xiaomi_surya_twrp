@@ -163,6 +163,8 @@ jobs:
         files: ${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
         name: ${{ steps.zipname.outputs.name }}-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
-        body: Recovery for ${{ github.event.inputs.DEVICE_NAME }}
+        body: |
+          Manifest: ${{ github.event.inputs.LIBRARY_BRANCH }}
+          Device: ${{ github.event.inputs.DEVICE_NAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.TEST }}
