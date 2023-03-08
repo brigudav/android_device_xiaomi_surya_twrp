@@ -105,11 +105,10 @@ jobs:
       run: |
         cd ${GITHUB_WORKSPACE}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         ccache -M 10G
-        source ${GITHUB_WORKSPACE}/config/base.sh
-        source build/envsetup.sh || true
         export ALLOW_MISSING_DEPENDENCIES=true
         export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
         export LC_ALL="C"
+        source build/envsetup.sh || true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
         make clean
         mka adbd ${{ github.event.inputs.BUILD_TARGET }}image
