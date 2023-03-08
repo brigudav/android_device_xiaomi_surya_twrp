@@ -75,10 +75,11 @@ jobs:
 
     - name: Set-up Manifest
       run: |
-        mkdir ~/sync
-        cd ~/sync
+        mkdir ~/orangefoxtemp
+        cd ~/orangefoxtemp
         git clone ${{ github.event.inputs.MANIFEST_URL }} --depth=1 --single-branch
-        sync/./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ~/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
+        cd sync
+        ./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ~/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
 
     - name: Clone Device Tree
       run: |
