@@ -98,15 +98,12 @@ jobs:
 
     - name: Building Custom Recovery
       run: |
+        PATH=~/bin:$PATH
         cd ~/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         source build/envsetup.sh
         export ALLOW_MISSING_DEPENDENCIES=true
-        export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
-        export OF_MAINTAINER="brigudav"
         export LC_ALL="C"
         ${{ steps.fox_branch.outputs.value }}
-        echo "Done..."
-      shell: bash
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
