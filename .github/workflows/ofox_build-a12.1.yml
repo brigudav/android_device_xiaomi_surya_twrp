@@ -18,8 +18,6 @@ on:
         options:
         - 12.1
         - 11.0
-        - 10.0
-        - 9.0
       DEVICE_TREE:
         description: 'Custom Recovery Tree'
         required: true
@@ -54,9 +52,10 @@ jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
     runs-on: ubuntu-20.04
+
     steps:
     - name: Check Out
-      uses: actions/checkout@v2.5.0
+      uses: actions/checkout@v3
 
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
@@ -69,28 +68,18 @@ jobs:
     - name: Build Environment
       run: |
         sudo apt install aria2 -y
-        git clone https://github.com/cd-Spidey/Random.git ./buildenv
-        sudo bash buildenv/setup/packages/build_env.sh
-    - name: Install OpenJDK
-      uses: actions/setup-java@v3.6.0
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-
-    - name: Install Git-Repo
-      run: |
-        git config --global advice.detachedHead false
-        git clone https://android.googlesource.com/tools/repo -b v2.29 ~/bin
-        chmod a+x ~/bin/repo
-        sudo ln -sf ~/bin/repo /usr/bin/repo
+        git clone https://github.com/brigudav/scripts
+        cd scripts
+        sudo bash setup/android_build_env.sh
+        sudo bash setup/install_android_sdk.sh || true
 
     - name: Set-up Manifest
       run: |
-        mkdir ~/orangefoxtemp
-        cd ~/orangefoxtemp
-        git clone https://gitlab.com/OrangeFox/sync.git
-        cd sync
-        ./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ~/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
+        mkdir ~/sync
+        cd ~/sync
+        git clone ${{ github.event.inputs.MANIFEST_URL }} --depth=1 --single-branch
+        sync/./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ~/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
+
     - name: Clone Device Tree
       run: |
         cd ~/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
