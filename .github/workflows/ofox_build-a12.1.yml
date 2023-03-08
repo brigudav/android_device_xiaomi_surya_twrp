@@ -73,14 +73,13 @@ jobs:
       
     - name: Build Environment
       run: |
-        sudo apt install aria2 -y
-        git clone https://github.com/cd-Spidey/Random.git ./buildenv
-        sudo bash buildenv/setup/packages/build_env.sh
-        
-    - name: Install OpenJDK
-      run: |
-        git clone https://github.com/cd-Spidey/Random.git ./opendjk
-        sudo bash opendjk/setup/packages/open_jdk.sh
+        export HOME=${GITHUB_WORKSPACE}
+        cd ${GITHUB_WORKSPACE}
+        sudo apt install git aria2 -y
+        git clone https://gitlab.com/OrangeFox/misc/scripts
+        cd scripts
+        sudo bash setup/android_build_env.sh
+        sudo bash setup/install_android_sdk.sh || true
         
     - name: Install Git-Repo
       run: |
