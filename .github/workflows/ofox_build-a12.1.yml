@@ -88,11 +88,12 @@ jobs:
 
     - name: Set-up Manifest
       run: |
-        mkdir ${GITHUB_WORKSPACE}/OrangeFox
-        cd ${GITHUB_WORKSPACE}/OrangeFox
+        mkdir ${GITHUB_WORKSPACE}/OrangeFox_sync
+        cd ${GITHUB_WORKSPACE}/OrangeFox_sync
         git config --global user.name "brigudav"
         git config --global user.email "alexvl1972@hotmail.com"
         git clone https://gitlab.com/OrangeFox/sync.git
+        cd ${GITHUB_WORKSPACE}/OrangeFox_sync/sync/
         ./orangefox_sync.sh --branch ${{ github.event.inputs.MANIFEST_BRANCH }} --path ${GITHUB_WORKSPACE}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
 
     - name: Clone Device Tree
@@ -117,8 +118,8 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.img
-          OrangeFox/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.zip
+          fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.img
+          fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.zip
         name: Unofficial OrangeFox for ${{ github.event.inputs.DEVICE_NAME }}
         tag_name: ${{ github.run_id }}
         body: |
