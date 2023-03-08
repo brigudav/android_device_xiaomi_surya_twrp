@@ -106,7 +106,7 @@ jobs:
         export LC_ALL="C"
         ${{ steps.fox_branch.outputs.value }}
         echo "Done..."
-      working-directory: ${{ steps.pwd.outputs.workdir }}
+      shell: bash
 
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
