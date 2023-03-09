@@ -59,7 +59,7 @@ jobs:
     - name: Set Current Date
       id: today
       run: |
-        echo "date=$(TZ=Australia/Sydney date +%Y%m%d-%l:%M%p)" >> $GITHUB_OUTPUT
+        echo "date=$(TZ=Australia/Sydney date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
         
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
@@ -122,8 +122,7 @@ jobs:
         name: Unofficial OrangeFox for ${{ github.event.inputs.DEVICE_NAME }}
         tag_name: ${{ github.run_id }}
         body: |
-          Build: fox_${{ github.event.inputs.MANIFEST_BRANCH }} - ${{ steps.today.outputs.date }}
-          Device: ${{ github.event.inputs.DEVICE_TREE }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }}
-          Manifest: ${{ github.event.inputs.MANIFEST_URL }}
+          Build Info: fox_${{ github.event.inputs.MANIFEST_BRANCH }} - ${{ steps.today.outputs.date }}
+          Device Tree: ${{ github.event.inputs.DEVICE_TREE }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }}
       env:
         GITHUB_TOKEN: ${{ secrets.TEST }}
