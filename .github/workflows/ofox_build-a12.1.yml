@@ -107,6 +107,10 @@ jobs:
         ccache -M 10G
         export ALLOW_MISSING_DEPENDENCIES=true
         export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
+        export FOX_VERSION="R12.1"
+        export OF_MAINTAINER="brigudav"
+        export FOX_BUILD_TYPE="Beta"
+        export OF_SCREEN_H=2400
         export LC_ALL="C"
         source build/envsetup.sh || true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
