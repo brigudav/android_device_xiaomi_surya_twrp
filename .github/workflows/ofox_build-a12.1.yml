@@ -3,13 +3,6 @@ name: OrangeFox Build - Final
 on:
   workflow_dispatch:
     inputs:
-      MANIFEST_URL:
-        description: 'Manifest'
-        required: true
-        default: ''
-        type: choice
-        options:
-        - https://gitlab.com/OrangeFox/sync.git
       MANIFEST_BRANCH:
         description: 'OrangeFox Branch'
         required: true
@@ -105,14 +98,6 @@ jobs:
       run: |
         cd ${GITHUB_WORKSPACE}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}
         ccache -M 10G
-        export ALLOW_MISSING_DEPENDENCIES=true
-        export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
-        export FOX_VERSION="R12.1"
-        export OF_MAINTAINER="brigudav"
-        export FOX_BUILD_TYPE="Beta"
-        export OF_SCREEN_H=2400
-        export LC_ALL="C"
-        export FOX_DELETE_AROMAFM=1
         source build/envsetup.sh || true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
         make clean
