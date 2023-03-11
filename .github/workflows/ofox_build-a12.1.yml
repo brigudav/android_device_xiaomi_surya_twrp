@@ -13,7 +13,7 @@ on:
       MANIFEST_BRANCH:
         description: 'OrangeFox Branch'
         required: true
-        default: '10' # Branch 11 and 12.1's lunch command doesn't work using this action builder.
+        default: '10'
         type: choice
         options:
         - 12.1
@@ -54,7 +54,7 @@ jobs:
     runs-on: ubuntu-18.04
     steps:
     - name: Check Out
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3
       
     - name: Set Current Date
       id: today
@@ -82,7 +82,7 @@ jobs:
     - name: Install Git-Repo
       run: |
         git config --global advice.detachedHead false
-        git clone https://android.googlesource.com/tools/repo -b v2.29 ~/bin
+        git clone https://android.googlesource.com/tools/repo -b v2.30 ~/bin
         chmod a+x ~/bin/repo
         sudo ln -sf ~/bin/repo /usr/bin/repo
 
