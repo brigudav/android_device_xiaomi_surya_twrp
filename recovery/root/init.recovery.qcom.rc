@@ -1,10 +1,14 @@
 on fs
     wait /dev/block/platform/soc/${ro.boot.bootdevice}
     symlink /dev/block/platform/soc/${ro.boot.bootdevice} /dev/block/bootdevice
+    chmod 0660 /dev/qseecom
+    chown system drmrpc /dev/qseecom
+    chmod 0664 /dev/ion
+    chown system system /dev/ion
     install_keyring
 
 on init
-    setprop crypto.ready 1
+    start vendor.qseecomd
 
 service vendor.qseecomd /vendor/bin/qseecomd
     user root
@@ -48,19 +52,9 @@ on boot
     start vibrator-service
     start health-hal-2-1
 
-on property:crypto.ready=0
-    stop vendor.qseecomd
-    stop keymaster-4-0
-    stop gatekeeper-1-0
-    stop servicemanager
-
-on property:crypto.ready=1
-    start vendor.qseecomd
-
 on property:vendor.sys.listeners.registered=true
     start keymaster-4-0
     start gatekeeper-1-0
-    start servicemanager
 
 on property:twrp.super.symlinks_created=true
     start patchfstab
