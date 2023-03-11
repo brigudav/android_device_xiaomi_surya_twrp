@@ -36,22 +36,12 @@ if [ -z "$1" -a -z "$FOX_BUILD_DEVICE" ]; then
 fi
 
 if [ "$1" = "$FDEVICE" -o "$FOX_BUILD_DEVICE" = "$FDEVICE" ]; then
-	# Initial Info
-	export ALLOW_MISSING_DEPENDENCIES=true
-	export FOX_USE_TWRP_RECOVERY_IMAGE_BUILDER=1
-	export LC_ALL="C"
-
 	export TW_DEFAULT_LANGUAGE="en"
 	export FOX_RECOVERY_SYSTEM_PARTITION="/dev/block/mapper/system"
 	export FOX_RECOVERY_VENDOR_PARTITION="/dev/block/mapper/vendor"
-	export FOX_BUGGED_AOSP_ARB_WORKAROUND="1616300800"
-	export FOX_VERSION="R12.1"
-	export FOX_BUILD_TYPE="Beta"
-	export OF_MAINTAINER="brigudav"
 
 	# Funtions
 	export FOX_ASH_IS_BASH=1
-	export FOX_DELETE_AROMAFM=1
 	export FOX_ENABLE_APP_MANAGER=1
 	export FOX_REPLACE_BUSYBOX_PS=1
 	export FOX_REPLACE_TOOLBOX_GETPROP=1
@@ -73,9 +63,6 @@ if [ "$1" = "$FDEVICE" -o "$FOX_BUILD_DEVICE" = "$FDEVICE" ]; then
 	export OF_FIX_OTA_UPDATE_MANUAL_FLASH_ERROR=1
 	export OF_KEEP_DM_VERITY=1
 	export OF_SUPPORT_ALL_BLOCK_OTA_UPDATES=1
-
-	# Display Settings
-	export OF_SCREEN_H=2400
 
 	# let's see what are our build VARs
 	if [ -n "$FOX_BUILD_LOG_FILE" -a -f "$FOX_BUILD_LOG_FILE" ]; then
