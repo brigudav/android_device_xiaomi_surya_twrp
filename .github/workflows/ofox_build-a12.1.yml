@@ -105,6 +105,7 @@ jobs:
         export FOX_BUILD_TYPE="Beta"
         export OF_SCREEN_H=2400
         export LC_ALL="C"
+        export FOX_BUGGED_AOSP_ARB_WORKAROUND="1616300800"
         export FOX_DELETE_AROMAFM=1
         source build/envsetup.sh || true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
