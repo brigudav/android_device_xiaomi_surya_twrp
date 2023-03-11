@@ -61,3 +61,13 @@ on property:vendor.sys.listeners.registered=true
     start keymaster-4-0
     start gatekeeper-1-0
     start servicemanager
+
+on property:twrp.super.symlinks_created=true
+    start patchfstab
+
+service patchfstab /system/bin/patchfstab.sh
+    user root
+    group root
+    disabled
+    oneshot
+    seclabel u:r:recovery:s0
