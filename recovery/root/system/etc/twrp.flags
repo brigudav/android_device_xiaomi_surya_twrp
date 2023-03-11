@@ -37,5 +37,5 @@
 /vbmeta_system    emmc   /dev/block/sda9                 flags=backup=1;display="VBMeta System";flashimg
 # Removable storage
 /external_sd      vfat   /dev/block/mmcblk0p1 /dev/block/mmcblk0 flags=fsflags=utf8;display="MicroSD";storage;wipeingui;removable
-/usb_otg          vfat   /dev/block/sdg1 /dev/block/sdg          flags=fsflags=utf8;display="USB Storage";storage;wipeingui;removable
+/usb-otg          vfat   /dev/block/sdg1 /dev/block/sdg          flags=fsflags=utf8;display="USB Storage";storage;wipeingui;removable
 
