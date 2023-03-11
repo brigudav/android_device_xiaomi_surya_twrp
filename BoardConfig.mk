@@ -22,16 +22,21 @@ QCOM_BOARD_PLATFORMS += sm6150
 
 # Architecture
 TARGET_ARCH := arm64
-TARGET_ARCH_VARIANT := armv8-2a
+TARGET_ARCH_VARIANT := armv8-a
 TARGET_CPU_ABI := arm64-v8a
 TARGET_CPU_ABI2 :=
-TARGET_CPU_VARIANT := cortex-a76
+TARGET_CPU_VARIANT := generic
+TARGET_CPU_VARIANT_RUNTIME := cortex-a76
 
 TARGET_2ND_ARCH := arm
-TARGET_2ND_ARCH_VARIANT := armv8-2a
+TARGET_2ND_ARCH_VARIANT := armv8-a
 TARGET_2ND_CPU_ABI := armeabi-v7a
 TARGET_2ND_CPU_ABI2 := armeabi
-TARGET_2ND_CPU_VARIANT := cortex-a55
+TARGET_2ND_CPU_VARIANT := generic
+TARGET_2ND_CPU_VARIANT_RUNTIME := cortex-a76
+
+TARGET_USES_64_BIT_BINDER := true
+TARGET_SUPPORTS_64_BIT_APPS := true
 
 # Enable CPUSets
 ENABLE_CPUSETS := true
@@ -39,20 +44,14 @@ ENABLE_SCHEDBOOST := true
 
 # Kernel
 BOARD_KERNEL_CMDLINE := \
-	console=ttyMSM0,115200n8 \
 	androidboot.hardware=qcom \
-	androidboot.console=ttyMSM0 \
 	androidboot.memcg=1 \
 	lpm_levels.sleep_disabled=1 \
-	video=vfb:640x400,bpp=32,memsize=3072000 \
 	msm_rtb.filter=0x237 \
 	service_locator.enable=1 \
 	androidboot.usbcontroller=a600000.dwc3 \
 	swiotlb=2048 \
 	androidboot.boot_devices=soc/1d84000.ufshc \
-	cgroup.memory=nokmem,nosocket \
-	androidboot.init_fatal_reboot_target=recovery \
-	androidboot.fastboot=1 \
 	androidboot.selinux=permissive
 
 BOARD_KERNEL_IMAGE_NAME    := Image
@@ -83,7 +82,6 @@ BOARD_MKBOOTIMG_ARGS += \
 
 # Avb
 BOARD_AVB_ENABLE := true
-BOARD_AVB_ROLLBACK_INDEX := $(PLATFORM_SECURITY_PATCH_TIMESTAMP)
 BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
 BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
@@ -108,6 +106,7 @@ BOARD_MAIN_PARTITION_LIST := \
 # File systems
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+BOARD_HAS_LARGE_FILESYSTEM := true
 
 # Workaround for error copying vendor files to recovery ramdisk
 BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
@@ -117,26 +116,27 @@ TARGET_COPY_OUT_PRODUCT := product
 TARGET_COPY_OUT_SYSTEM_EXT := system_ext
 TARGET_COPY_OUT_VENDOR := vendor
 
+BOARD_USES_METADATA_PARTITION := true
+BOARD_ROOT_EXTRA_FOLDERS += metadata
+
 # Extras props
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
-# Crypto
-PLATFORM_VERSION := 127
+# Hack: prevent anti rollback
+PLATFORM_VERSION := 99.87.36
 PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
+PLATFORM_SECURITY_PATCH := 2099-12-31
+VENDOR_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
+
+# Encryption
 TW_INCLUDE_CRYPTO := true
 TW_INCLUDE_CRYPTO_FBE := true
 TW_INCLUDE_FBE_METADATA_DECRYPT := true
-PLATFORM_SECURITY_PATCH := 2127-12-31
-VENDOR_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
-TW_USE_FSCRYPT_POLICY := 1
-
-BOARD_USES_METADATA_PARTITION := true
-BOARD_ROOT_EXTRA_FOLDERS += metadata
+#TW_USE_FSCRYPT_POLICY := 1
 
 # Recovery
 TARGET_RECOVERY_PIXEL_FORMAT := "RGBX_8888"
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery/root/system/etc/recovery.fstab
-BOARD_HAS_LARGE_FILESYSTEM := true
 
 # TWRP specific build flags
 TW_THEME := portrait_hdpi
@@ -147,9 +147,9 @@ TW_EXCLUDE_DEFAULT_USB_INIT := true
 #TW_EXTRA_LANGUAGES := true
 TW_INCLUDE_NTFS_3G := true
 TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
-TW_DEFAULT_BRIGHTNESS := 1200
-TW_Y_OFFSET := 91
-TW_H_OFFSET := -91
+TW_DEFAULT_BRIGHTNESS := 1500
+#TW_Y_OFFSET := 91
+#TW_H_OFFSET := -91
 TARGET_USES_MKE2FS := true
 TW_NO_SCREEN_BLANK := true
 TW_EXCLUDE_APEX := true
