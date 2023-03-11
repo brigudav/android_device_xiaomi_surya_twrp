@@ -4,6 +4,7 @@
 
 # mount point    fstype   device            device2      flags
 /boot             emmc   /dev/block/sde46
+/metadata         ext4   /dev/block/sda10                flags=display="Metadata"
 /dtbo             emmc   /dev/block/sde47                flags=backup=1;display="DTBO";flashimg
 /recovery         emmc   /dev/block/sda8                 flags=backup=1;display="Recovery";flashimg
 /firmware         vfat   /dev/block/sde4                 flags=display="Firmware";mounttodecrypt;fsflags=ro
@@ -37,5 +38,4 @@
 /vbmeta_system    emmc   /dev/block/sda9                 flags=backup=1;display="VBMeta System";flashimg
 # Removable storage
 /external_sd      vfat   /dev/block/mmcblk0p1 /dev/block/mmcblk0 flags=fsflags=utf8;display="MicroSD";storage;wipeingui;removable
-/usb_otg          vfat   /dev/block/sdg1 /dev/block/sdg          flags=fsflags=utf8;display="USB Storage";storage;wipeingui;removable
-
+/usb_otg          vfat   /dev/block/sdg1 /dev/block/sdg          flags=fsflags=utf8;display="USB-Storage";storage;wipeingui;removable
