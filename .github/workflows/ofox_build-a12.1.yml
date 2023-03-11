@@ -117,6 +117,12 @@ jobs:
         make clean
         mka adbd ${{ github.event.inputs.BUILD_TARGET }}image
 
+    - name: Renaming files
+      run: |
+        cd out/target/product/${{ github.event.inputs.DEVICE_NAME }}
+        mv OrangeFox*.img OrangeFox*-${{ steps.today.outputs.date }}.img
+        mv OrangeFox*.zip OrangeFox*-${{ steps.today.outputs.date }}.zip
+
     - name: Upload to Release
       uses: softprops/action-gh-release@v1
       with:
