@@ -25,7 +25,7 @@ on:
       DEVICE_TREE_BRANCH:
         description: 'Custom Recovery Tree Branch'
         required: true
-        default: 'android-12.1'
+        default: 'fox-12.1'
       DEVICE_PATH:
         description: 'Specify your device path.'
         required: true
@@ -112,6 +112,7 @@ jobs:
         export FOX_BUILD_TYPE="Beta"
         export OF_SCREEN_H=2400
         export LC_ALL="C"
+        export FOX_DELETE_AROMAFM=1
         source build/envsetup.sh || true
         lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
         make clean
