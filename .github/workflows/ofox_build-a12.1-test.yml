@@ -139,7 +139,7 @@ jobs:
     - name: Renaming files
       run: |
         cd ${{ steps.var.outputs.Outdir }}
-        mv OrangeFox*.zip OrangeFox*-${{ steps.var.outputs.date }}.zip
+        mv -f OrangeFox-R12.1-Beta-surya.zip OrangeFox-R12.1-Beta-surya-${{ steps.var.outputs.date }}.zip
         echo "name=$(find * -name *.zip -type f)" >> $GITHUB_OUTPUT
       id: zipname
 
@@ -154,7 +154,7 @@ jobs:
         -F disable_notification=true \
         -F parse_mode=HTML \
         -F caption=" <b>- Build for <i>${{ github.event.inputs.DEVICE_NAME }}</i> completed.</b> " \
-        -F document=@"${{ steps.var.outputs.Outdir }}/OrangeFox*.zip"
+        -F document=@${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
 
     - name: Publish to GitHub
       if: github.event.inputs.PUBLISH == 'true'
