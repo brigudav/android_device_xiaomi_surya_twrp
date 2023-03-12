@@ -49,11 +49,6 @@ jobs:
     - name: Check Out
       uses: actions/checkout@v3
       
-    - name: Set Current Date
-      id: today
-      run: |
-        echo "date=$(TZ=Australia/Sydney date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
-        
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
 
@@ -105,8 +100,10 @@ jobs:
         export FOX_BUILD_TYPE="Beta"
         export OF_SCREEN_H=2400
         export OF_STATUS_H=91
-        export OF_STATUS_INDENT_LEFT=39
-        export OF_STATUS_INDENT_RIGHT=39
+        export OF_STATUS_INDENT_LEFT=48
+        export OF_STATUS_INDENT_RIGHT=48
+        export OF_HIDE_NOTCH=1
+        export OF_CLOCK_POS=1
         export LC_ALL="C"
         export FOX_RECOVERY_SYSTEM_PARTITION="/dev/block/mapper/system"
         export FOX_RECOVERY_VENDOR_PARTITION="/dev/block/mapper/vendor"
@@ -117,22 +114,34 @@ jobs:
         make clean
         mka adbd ${{ github.event.inputs.BUILD_TARGET }}image
 
+    - name: Set Variables
+      run: |
+        echo "date=$(TZ=Australia/Sydney date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+        echo "Outdir=${GITHUB_WORKSPACE}/fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}" >> $GITHUB_OUTPUT
+      id: var
+
+    - name: Find name ZIP
+      run: |
+        cd ${{ steps.var.outputs.Outdir }}
+        echo "name=$(find * -name *.zip -type f | sed 's/\.[^.]*$//')" >> $GITHUB_OUTPUT
+      id: zipname
+
     - name: Renaming files
       run: |
-        cd out/target/product/${{ github.event.inputs.DEVICE_NAME }}
-        mv OrangeFox*.img OrangeFox*-${{ steps.today.outputs.date }}.img
-        mv OrangeFox*.zip OrangeFox*-${{ steps.today.outputs.date }}.zip
+        cd ${{ steps.var.outputs.Outdir }}
+        mv -f ${{ steps.zipname.outputs.name }}.zip ${{ steps.zipname.outputs.name }}-${{ steps.var.outputs.date }}.zip
+        mv -f ${{ steps.zipname.outputs.name }}.img ${{ steps.zipname.outputs.name }}-${{ steps.var.outputs.date }}.img
 
-    - name: Upload to Release
+    - name: Publish to GitHub
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.img
-          fox_${{ github.event.inputs.MANIFEST_BRANCH }}/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/OrangeFox*.zip
+          ${{ steps.var.outputs.Outdir }}/OrangeFox*.img
+          ${{ steps.var.outputs.Outdir }}/OrangeFox*.zip
         name: Unofficial OrangeFox for ${{ github.event.inputs.DEVICE_NAME }}
         tag_name: ${{ github.run_id }}
         body: |
-          Build Info: fox_${{ github.event.inputs.MANIFEST_BRANCH }} - ${{ steps.today.outputs.date }}
+          Build Info: fox_${{ github.event.inputs.MANIFEST_BRANCH }} - ${{ steps.var.outputs.date }}
           Device Tree: ${{ github.event.inputs.DEVICE_TREE }}/tree/${{ github.event.inputs.DEVICE_TREE_BRANCH }}
       env:
         GITHUB_TOKEN: ${{ secrets.TEST }}
