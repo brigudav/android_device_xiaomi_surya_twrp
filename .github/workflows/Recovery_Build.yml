@@ -3,18 +3,30 @@ name: Recovery Build
 on:
   workflow_dispatch:
     inputs:
-      MANIFEST_URL:
-        description: 'MANIFEST_URL (if not using SSH keys, use https:// URL)'
+      MANIFEST_TYPE:
+        description: 'MANIFEST_TYPE'
         required: true
-        default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp'
-      MANIFEST_BRANCH:
-        description: 'MANIFEST_BRANCH'
+        default: 'twrp'
+        type: choice
+        options:
+        - twrp
+        - omni
+      MANIFEST_URL:
+        description: 'MANIFEST_URL'
+        required: true
+        default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git'
+      LIBRARY_BRANCH:
+        description: 'LIBRARY_BRANCH'
         required: true
         default: 'twrp-12.1'
+        type: choice
+        options:
+        - twrp-11
+        - twrp-12.1
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
-        default: 'https://github.com/brigudav/android_device_xiaomi_surya_twrp'
+        default: 'https://github.com/brigudav/android_device_xiaomi_surya_twrp.git'
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
@@ -23,91 +35,61 @@ on:
         description: 'DEVICE_PATH'
         required: true
         default: 'device/xiaomi/surya'
-      COMMON_TREE_URL:
-        description: 'COMMON_TREE_URL (if no common tree, leave blank)'
-        required: false
-      COMMON_PATH:
-        description: 'COMMON_PATH (if no common tree, leave blank)'
-        required: false
       DEVICE_NAME:
         description: 'DEVICE_NAME'
         required: true
         default: 'surya'
-      MAKEFILE_NAME:
-        description: 'MAKEFILE_NAME'
-        required: true
-        default: 'twrp_surya'
-      BUILD_TARGET:
-        description: 'BUILD_TARGET'
+      DEVICE_TYPE:
+        description: 'DEVICE_TYPE'
         required: true
         default: 'recovery'
+        type: choice
+        options:
+        - recovery
+        - boot
+        - vendorboot
+      UPLOAD:
+        description: 'Upload to Telegram Bot (true or false)'
+        required: true
+        default: 'yes'
+        type: choice
+        options:
+        - yes
+        - no
+      PUBLISH:
+        description: 'Publish to GitHub (true or false)'
+        required: true
+        default: 'yes'
+        type: choice
+        options:
+        - yes
+        - no
 
 jobs:
   build:
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: ubuntu-18.04
-    # You can use either of the ubuntu-18.04 or ubuntu-20.04 runner
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: write
+
     steps:
-    - name: Display Run Parameters
-      run: |
-        echo "::group::User Environment Variables"
-        echo "Manifest URL: ${{ github.event.inputs.MANIFEST_URL }}"
-        echo "Manifest Branch: ${{ github.event.inputs.MANIFEST_BRANCH }}"
-        echo "Device Tree URL: ${{ github.event.inputs.DEVICE_TREE_URL }}"
-        echo "Device Tree Branch: ${{ github.event.inputs.DEVICE_TREE_BRANCH }}"
-        echo "Device Name: ${{ github.event.inputs.DEVICE_NAME }}"
-        echo "Build Target: ${{ github.event.inputs.BUILD_TARGET }}.img"
-        echo "::endgroup::"
-
-    - name: Remove Useless Package
-      run: |
-        docker rmi `docker images -q`
-        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/sudo apt/sources.list.d
-        sudo apt -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-        sudo apt -y autoremove --purge
-        sudo apt -y autoclean
-        sudo apt clean
-
-    - name: Maximize Build Space
-      uses: easimon/maximize-build-space@master
-      with:
-        root-reserve-mb: 1024
-        swap-size-mb: 10240
-        remove-dotnet: 'true'
-        temp-reserve-mb: 1024
-        remove-android: 'true'
-        remove-haskell: 'true'
-
-    # You might want to Checkout your repo first, but not mandatory
     - name: Check Out
       uses: actions/checkout@v3
+
+    - name: Cleanup
+      uses: rokibhasansagar/slimhub_actions@main
 
     - name: Prepare the environment
       run: |
         sudo apt update
         sudo apt -y upgrade
-        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp python qemu-user-static libstdc++-10-dev
+        sudo apt -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python
 
-    - name: Install OpenJDK 7
-      if: |
-        github.event.inputs.MANIFEST_BRANCH == 'twrp-5.1'
-        || github.event.inputs.MANIFEST_BRANCH == 'twrp-6.0'
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: '7'
-
-    - name: Install OpenJDK 8
-      if: |
-        github.event.inputs.MANIFEST_BRANCH != 'twrp-5.1'
-        && github.event.inputs.MANIFEST_BRANCH != 'twrp-6.0'
+    - name: Install OpenJDK
       uses: actions/setup-java@v3
       with:
         distribution: 'zulu'
         java-version: '8'
-
-    - name: Verify Java Install
-      run: java -version
 
     - name: Setup SSH Keys
       if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
@@ -115,79 +97,83 @@ jobs:
       with:
           ssh-private-key: |
               ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Set variables
-      run: |
-        echo "::set-output name=date::$(date +%F)"
-      id: var
-
     - name: Install repo
       run: |
         mkdir ~/bin
         curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
         chmod a+x ~/bin/repo
-        export PATH=~/bin:$PATH
+        sudo ln -sf ~/bin/repo /usr/bin/repo
 
-    - name: Initialize repo
+    - name: Init Repo
       run: |
-        PATH=~/bin:$PATH
-        mkdir workspace
-        cd workspace
-        echo "::set-output name=pwd::$(pwd)"
+        export HOME=${GITHUB_WORKSPACE}
+        cd ${GITHUB_WORKSPACE}
+        mkdir ${GITHUB_WORKSPACE}/workspace
+        cd ${GITHUB_WORKSPACE}/workspace
         git config --global user.name "brigudav"
         git config --global user.email "alexvl1972@hotmail.com"
-        repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
-      id: pwd
+        repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.LIBRARY_BRANCH }}
 
     - name: Repo Sync
       run: |
-        PATH=~/bin:$PATH
-        cd workspace
-        repo sync -j$(nproc --all) -f --force-sync
-        ls -al
+        cd ${GITHUB_WORKSPACE}/workspace
+        repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-    - name: Clone device tree
+    - name: Clone Device Tree
       run: |
-        PATH=~/bin:$PATH
-        cd ${{ steps.pwd.outputs.pwd }}
+        cd ${GITHUB_WORKSPACE}/workspace
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
-
-    - name: Clone common tree
-      if: |
-        github.event.inputs.COMMON_TREE_URL != null
-        && github.event.inputs.COMMON_PATH != null
-      run: |
-        PATH=~/bin:$PATH
-        cd ${{ steps.pwd.outputs.pwd }}
-        git clone ${{ github.event.inputs.COMMON_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.COMMON_PATH }}
-
-    - name: Check Build Branch
-      if: ${{ github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1' }}
-      run: |
-        PATH=~/bin:$PATH
-        cd ${{ steps.pwd.outputs.pwd }}
-        source build/envsetup.sh
-        repopick 5405 5540
+        rm -rf bootable/recovery && git clone https://github.com/brigudav/bootable_recovery_twrp -b android-12.1 --depth 1 bootable/recovery
 
     - name: Building recovery
       run: |
-        PATH=~/bin:$PATH
-        cd ${{ steps.pwd.outputs.pwd }}
-        source build/envsetup.sh
-        lunch ${{ github.event.inputs.MAKEFILE_NAME }}-eng
+        cd ${GITHUB_WORKSPACE}/workspace
         export ALLOW_MISSING_DEPENDENCIES=true
+        source build/envsetup.sh
+        lunch ${{ github.event.inputs.MANIFEST_TYPE }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         make clean
-        make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+        make ${{ github.event.inputs.DEVICE_TYPE }}image -j$(nproc --all)
 
-    - name: Upload to Release
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 12
+
+    - name: Set Variables
+      run: |
+        echo "date=$(TZ=Australia/Sydney date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+        echo "Outdir=${GITHUB_WORKSPACE}/workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}" >> $GITHUB_OUTPUT
+      id: var
+
+    - name: Add Img to Zip
+      run: |
+        cd ${{ steps.var.outputs.Outdir }}
+        zip -9 twrp-${{ github.event.inputs.DEVICE_NAME }}-${{ steps.var.outputs.date }}.zip ${{ github.event.inputs.DEVICE_TYPE }}.img
+        echo "name=$(find * -name *.zip -type f)" >> $GITHUB_OUTPUT
+      id: zipname
+
+    - name: Upload to Telegram Bot
+      if: github.event.inputs.UPLOAD == 'true'
+      env:
+        CHAT_ID: ${{ secrets.TELEGRAM_TO }}
+        BOT_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      run: |
+        curl https://api.telegram.org/bot$BOT_TOKEN/sendDocument \
+        -F chat_id=$CHAT_ID \
+        -F disable_notification=true \
+        -F parse_mode=HTML \
+        -F caption=" <b>- Build for <i>${{ github.event.inputs.DEVICE_NAME }}</i> completed.</b> " \
+        -F document=@${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
+
+    - name: Publish to GitHub
+      if: github.event.inputs.PUBLISH == 'true'
       uses: softprops/action-gh-release@v1
       with:
-        files: workspace/out/target/product/${{ github.event.inputs.DEVICE_NAME }}/${{ github.event.inputs.BUILD_TARGET }}.img
-        name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+        files: ${{ steps.var.outputs.Outdir }}/${{ steps.zipname.outputs.name }}
+        name: ${{ steps.zipname.outputs.name }}-${{ github.run_id }}
         tag_name: ${{ github.run_id }}
         body: |
-          Manifest: ${{ github.event.inputs.MANIFEST_BRANCH }}
+          Manifest: ${{ github.event.inputs.LIBRARY_BRANCH }}
           Device: ${{ github.event.inputs.DEVICE_NAME }}
-          Target: ${{ github.event.inputs.BUILD_TARGET }}.img
       env:
         GITHUB_TOKEN: ${{ secrets.TEST }}
