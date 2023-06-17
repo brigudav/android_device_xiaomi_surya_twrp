@@ -125,6 +125,11 @@ jobs:
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
         rm -rf bootable/recovery && git clone https://github.com/brigudav/bootable_recovery_twrp -b android-12.1 --depth 1 bootable/recovery
 
+    - name: Set Swap Space
+      uses: pierotofy/set-swap-space@master
+      with:
+        swap-size-gb: 12
+
     - name: Building recovery
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
@@ -133,11 +138,6 @@ jobs:
         lunch ${{ github.event.inputs.MANIFEST_TYPE }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         make clean
         make ${{ github.event.inputs.DEVICE_TYPE }}image -j$(nproc --all)
-
-    - name: Set Swap Space
-      uses: pierotofy/set-swap-space@master
-      with:
-        swap-size-gb: 12
 
     - name: Set Variables
       run: |
