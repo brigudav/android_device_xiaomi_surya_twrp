@@ -74,7 +74,7 @@ jobs:
 
     steps:
     - name: Check Out
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
