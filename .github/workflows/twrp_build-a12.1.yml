@@ -71,14 +71,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Remove Useless Package
-      run: |
-        docker rmi `docker images -q`
-        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/sudo apt/sources.list.d
-        sudo apt -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-        sudo apt -y autoremove --purge
-        sudo apt -y autoclean
-        sudo apt clean
+    - name: Cleanup
+      uses: rokibhasansagar/slimhub_actions@main
 
     - name: Maximize Build Space
       uses: easimon/maximize-build-space@master
@@ -91,7 +85,7 @@ jobs:
         remove-haskell: 'true'
 
     - name: Check Out Repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: Prepare Environment
       run: |
