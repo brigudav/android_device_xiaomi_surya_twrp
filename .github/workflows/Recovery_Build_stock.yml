@@ -119,6 +119,13 @@ jobs:
         cd ${GITHUB_WORKSPACE}/workspace
         repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
+    - name: Repopick Fscrypt
+      if: ${{ github.event.inputs.LIBRARY_URL == 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git' && github.event.inputs.LIBRARY_BRANCH == 'twrp-12.1' }}
+      run: |
+        cd ${GITHUB_WORKSPACE}/workspace
+        source build/envsetup.sh
+        repopick 6840
+
     - name: Clone Device Tree
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
