@@ -119,14 +119,6 @@ jobs:
         cd ${GITHUB_WORKSPACE}/workspace
         repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
 
-    - name: Repopick Fscrypt
-      run: |
-        git config --global user.name "brigudav"
-        git config --global user.email "alexvl1972@hotmail.com"
-        cd ${GITHUB_WORKSPACE}/workspace
-        source build/envsetup.sh
-        repopick 6840
-
     - name: Clone Device Tree
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
@@ -142,7 +134,9 @@ jobs:
         cd ${GITHUB_WORKSPACE}/workspace
         export ALLOW_MISSING_DEPENDENCIES=true
         source build/envsetup.sh
+        repopick 6840
         lunch ${{ github.event.inputs.MANIFEST_TYPE }}_${{ github.event.inputs.DEVICE_NAME }}-eng
+        rm -rf .repo/
         make clean
         make ${{ github.event.inputs.DEVICE_TYPE }}image -j$(nproc --all)
 
