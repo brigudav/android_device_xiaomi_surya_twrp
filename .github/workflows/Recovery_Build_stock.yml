@@ -121,6 +121,8 @@ jobs:
 
     - name: Repopick Fscrypt
       run: |
+        git config --global user.name "brigudav"
+        git config --global user.email "alexvl1972@hotmail.com"
         cd ${GITHUB_WORKSPACE}/workspace
         source build/envsetup.sh
         repopick 6840
