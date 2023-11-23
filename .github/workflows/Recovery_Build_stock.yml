@@ -117,7 +117,8 @@ jobs:
     - name: Repo Sync
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
-        repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+        repo sync -j$(nproc --all)
+        ls -al
 
     - name: Clone Device Tree
       run: |
@@ -134,6 +135,8 @@ jobs:
         cd ${GITHUB_WORKSPACE}/workspace
         export ALLOW_MISSING_DEPENDENCIES=true
         source build/envsetup.sh
+        git config --global user.name "brigudav"
+        git config --global user.email "alexvl1972@hotmail.com"
         repopick 6840
         lunch ${{ github.event.inputs.MANIFEST_TYPE }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         rm -rf .repo/
