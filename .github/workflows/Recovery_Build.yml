@@ -131,7 +131,7 @@ jobs:
 
     - name: Apply custom diff.patch
       run: |
-        bash ${GITHUB_WORKSPACE}/workspace/${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+        bash ${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
       working-directory: workspace
       continue-on-error: true
 
