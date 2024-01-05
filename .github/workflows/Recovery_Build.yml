@@ -130,6 +130,18 @@ jobs:
       with:
         swap-size-gb: 12
 
+    - name: Apply custom diff.patch
+      run: |
+        cd ${GITHUB_WORKSPACE}/workspace
+        bash ${GITHUB_WORKSPACE}/workspace/${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+      continue-on-error: true
+
+    - name: Apply Patches
+      shell: bash
+      working-directory: workspace
+      run: ./${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh $GITHUB_WORKSPACE
+      continue-on-error: true
+
     - name: Building recovery
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
