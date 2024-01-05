@@ -107,25 +107,24 @@ jobs:
 
     - name: Init Repo
       run: |
-        export HOME=${GITHUB_WORKSPACE}
-        cd ${GITHUB_WORKSPACE}
-        mkdir ${GITHUB_WORKSPACE}/workspace
-        cd ${GITHUB_WORKSPACE}/workspace
+        mkdir workspace
+        cd workspace
+        echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
         git config --global user.name "brigudav"
         git config --global user.email "alexvl1972@hotmail.com"
         repo init --depth=1 -u ${{ steps.manifest.outputs.value }} -b ${{ github.event.inputs.LIBRARY_BRANCH }}
+      id: pwd
 
     - name: Repo Sync
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
         sed -i '/remove-project name="platform\/external\/gflags"/d' .repo/manifests/remove-minimal.xml
-        repo sync -j$(nproc --all)
-        ls -al
+        repo sync -j$(nproc --all) --force-sync
+      working-directory: workspace
 
     - name: Clone Device Tree
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
@@ -143,21 +142,19 @@ jobs:
     - name: Apply custom diff.patch
       if: github.event.inputs.APPLYPATCH == 'true'
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
         bash ${GITHUB_WORKSPACE}/workspace/${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
       continue-on-error: true
 
     - name: Building recovery
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
-        export ALLOW_MISSING_DEPENDENCIES=true
         source build/envsetup.sh
-        git config --global user.name "brigudav"
-        git config --global user.email "alexvl1972@hotmail.com"
+        export ALLOW_MISSING_DEPENDENCIES=true
         lunch ${{ steps.manifesttype.outputs.value }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         rm -rf .repo/
         make clean
         make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Set Variables
       run: |
