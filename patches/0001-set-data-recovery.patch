@@ -1,0 +1,67 @@
+From bbd81a6be39021c77501aaa06e2dcddd15df6cea Mon Sep 17 00:00:00 2001
+From: Fernando Oliveira <fernandoaju78@gmail.com>
+Date: Sun, 22 Oct 2023 12:09:06 -0300
+Subject: [PATCH] set data/recovery on devices where the TW_INCLUDE_CRYPTO flag has not been set
+
+On some devices where the cryptography is broken, the maintainers do not set the flag and the data/recovery is not being created, so that at each boot the settings are not saved.
+
+Change-Id: I4b308d17aea18bdda215b1f11393e40f2d4647b9
+Signed-off-by: Fernando Oliveira <fernandoaju78@gmail.com>
+---
+
+diff --git a/data.cpp b/data.cpp
+index c19fe4c..db04741 100644
+--- a/data.cpp
++++ b/data.cpp
+@@ -1140,5 +1140,5 @@
+ void DataManager::LoadTWRPFolderInfo(void)
+ {
+ 	SetValue(TW_RECOVERY_FOLDER_VAR, TWFunc::Check_For_TwrpFolder());
+-	mBackingFile = GetSettingsStoragePath() + GetStrValue(TW_RECOVERY_NAME) + '/' + TW_SETTINGS_FILE;
++	mBackingFile = GetSettingsStoragePath() + GetStrValue(TW_RECOVERY_NAME) + TW_SETTINGS_FILE;
+ }
+diff --git a/partition.cpp b/partition.cpp
+index 18528f1..351e26b 100755
+--- a/partition.cpp
++++ b/partition.cpp
+@@ -1275,6 +1275,8 @@
+ 			Storage_Path = Mount_Point + "/media/0";
+ 			Symlink_Path = Storage_Path;
+ 			DataManager::SetValue(TW_INTERNAL_PATH, Mount_Point + "/media/0");
++			//Devices without encryption do not run the Post_Decrypt function so the "data/recovery" folder was not being created on these devices
++			DataManager::SetValue("tw_settings_path", TW_STORAGE_PATH);
+ 			UnMount(true);
+ 		}
+ 		DataManager::SetValue("tw_has_internal", 1);
+diff --git a/partitionmanager.cpp b/partitionmanager.cpp
+index ca7e232..f25552b 100755
+--- a/partitionmanager.cpp
++++ b/partitionmanager.cpp
+@@ -3169,8 +3169,6 @@
+ 		}
+ 	}
+ 
+-	//Devices without encryption do not run the Post_Decrypt function so the "data/recovery" folder was not being created on these devices
+-	DataManager::SetValue("tw_settings_path", TW_STORAGE_PATH);
+ 	LOGINFO("Decrypt adopted storage starting\n");
+ 	char* xmlFile = PageManager::LoadFileToBuffer(path, NULL);
+ 	xml_document<> *doc = NULL;
+diff --git a/twrp-functions.cpp b/twrp-functions.cpp
+index 6be85be..7f4921e 100644
+--- a/twrp-functions.cpp
++++ b/twrp-functions.cpp
+@@ -1452,9 +1452,12 @@
+ 
+ 	if (oldFolder == "" && customTWRPFolders.empty()) {
+ 		LOGINFO("No recovery folder found. Using default folder.\n");
++		TWPartition* SDCard = PartitionManager.Find_Partition_By_Path(DataManager::GetCurrentStoragePath());
+ 		//Creates the TWRP folder if it does not exist on the device and if the folder has not been changed to a new name
+-		mainPath += TW_DEFAULT_RECOVERY_FOLDER;
+-		mkdir(mainPath.c_str(), 0777);
++		if (SDCard->Mount(true)) {
++			mainPath += TW_DEFAULT_RECOVERY_FOLDER;
++			mkdir(mainPath.c_str(), 0777);
++		}
+ 		goto exit;
+ 	} else if (customTWRPFolders.empty()) {
+ 		LOGINFO("No custom recovery folder found. Using TWRP as default.\n");
