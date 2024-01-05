@@ -122,13 +122,6 @@ jobs:
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
       working-directory: workspace
 
-    - name: Apply custom diff.patch
-      if: github.event.inputs.APPLYPATCH == 'true'
-      run: |
-        bash ./${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
-      working-directory: workspace
-      continue-on-error: true
-
     - name: Check Build Tree
       uses: haya14busa/action-cond@v1
       id: buildtree
@@ -137,10 +130,24 @@ jobs:
         if_true: twrp
         if_false: omni
 
+    - name: Sync Device Dependencies
+      run: |
+        bash ${GITHUB_WORKSPACE}/scripts/convert.sh ${{ github.event.inputs.DEVICE_PATH }}/${{ steps.buildtree.outputs.value }}.dependencies
+        repo sync -j$(nproc --all)
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+      continue-on-error: true
+
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
         swap-size-gb: 12
+
+    - name: Apply custom diff.patch
+      if: github.event.inputs.APPLYPATCH == 'true'
+      run: |
+        bash ${GITHUB_WORKSPACE}/workspace/${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+      continue-on-error: true
 
     - name: Building recovery
       run: |
