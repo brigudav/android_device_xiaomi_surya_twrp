@@ -55,7 +55,7 @@ on:
       APPLYPATCH:
         description: 'Apply diff.patch (true or false)' # Check and run /patches/apply-patches.sh
         required: false
-        default: 'no'
+        default: 'yes'
         type: choice
         options:
         - yes
