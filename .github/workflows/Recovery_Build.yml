@@ -132,13 +132,13 @@ jobs:
     - name: Apply custom diff.patch
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
-        ./${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+        bash ${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
       continue-on-error: true
 
     - name: Apply Patches
       shell: bash
       working-directory: workspace
-      run: ./${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh $GITHUB_WORKSPACE
+      run: ./${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh $GITHUB_WORKSPACE/workspace/bootable/recovery
       continue-on-error: true
 
     - name: Building recovery
