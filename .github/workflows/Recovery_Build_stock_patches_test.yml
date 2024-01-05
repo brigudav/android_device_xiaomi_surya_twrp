@@ -115,12 +115,12 @@ jobs:
     - name: Repo Sync
       run: |
         repo sync -j$(nproc --all) --force-sync
-      working-directory: workspace
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
       
     - name: Clone device tree
       run: |
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
-      working-directory: workspace
+      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
 
     - name: Check Build Tree
       uses: haya14busa/action-cond@v1
@@ -145,7 +145,7 @@ jobs:
     - name: Apply custom diff.patch
       if: github.event.inputs.APPLYPATCH == 'true'
       run: |
-        bash ${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+        bash ${GITHUB_WORKSPACE}/workspace/${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
       working-directory: ${{ steps.pwd.outputs.workspace-folder }}
       continue-on-error: true
 
