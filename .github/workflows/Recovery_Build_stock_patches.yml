@@ -150,7 +150,6 @@ jobs:
         source build/envsetup.sh
         git config --global user.name "brigudav"
         git config --global user.email "alexvl1972@hotmail.com"
-        repopick 6840
         lunch ${{ steps.manifesttype.outputs.value }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         rm -rf .repo/
         make clean
