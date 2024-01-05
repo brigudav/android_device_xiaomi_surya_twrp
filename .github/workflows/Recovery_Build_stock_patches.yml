@@ -1,4 +1,4 @@
-name: Recovery Build stock
+name: Recovery Build stock patches
 
 on:
   workflow_dispatch:
