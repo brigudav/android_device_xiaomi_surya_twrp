@@ -1,12 +1,8 @@
-name: Recovery Build stock patches test
+name: Recovery Build patches test
 
 on:
   workflow_dispatch:
     inputs:
-      MANIFEST_URL:
-        description: 'MANIFEST_URL (if want to use SSH keys, use git@github.com:XXXXX)'
-        required: true
-        default: 'https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp'
       MANIFEST_BRANCH:
         description: 'MANIFEST_BRANCH'
         required: true
@@ -91,12 +87,14 @@ jobs:
         sudo ln -s /usr/bin/python3 /usr/bin/python
       continue-on-error: true
 
-    - name: Setup SSH Keys
-      if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
-      uses: webfactory/ssh-agent@v0.5.4
+    - name: Check Manifest Branch
+      uses: haya14busa/action-cond@v1
+      id: manifest
       with:
-          ssh-private-key: |
-              ${{ secrets.SSH_PRIVATE_KEY }}
+        cond: ${{ github.event.inputs.LIBRARY_BRANCH == 'twrp-11' || github.event.inputs.LIBRARY_BRANCH == 'twrp-12.1' }}
+        if_true: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+        if_false: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git
+
     - name: Install repo
       run: |
         mkdir ~/bin
@@ -111,7 +109,7 @@ jobs:
         echo "workspace-folder=$(pwd)" >> $GITHUB_OUTPUT
         git config --global user.name "brigudav"
         git config --global user.email "alexvl1972@hotmail.com"
-        repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
+        repo init --depth=1 -u ${{ steps.manifest.outputs.value }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
       id: pwd
           
     - name: Repo Sync
@@ -122,7 +120,14 @@ jobs:
     - name: Clone device tree
       run: |
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
+      working-directory: workspace
+
+    - name: Apply custom diff.patch
+      if: github.event.inputs.APPLYPATCH == 'true'
+      run: |
+        bash ${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+      working-directory: workspace
+      continue-on-error: true
 
     - name: Check Build Tree
       uses: haya14busa/action-cond@v1
@@ -132,24 +137,10 @@ jobs:
         if_true: twrp
         if_false: omni
 
-    - name: Sync Device Dependencies
-      run: |
-        bash ${GITHUB_WORKSPACE}/scripts/convert.sh ${{ github.event.inputs.DEVICE_PATH }}/${{ steps.buildtree.outputs.value }}.dependencies
-        repo sync -j$(nproc --all)
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-      continue-on-error: true
-
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
       with:
         swap-size-gb: 12
-
-    - name: Apply custom diff.patch
-      if: github.event.inputs.APPLYPATCH == 'true'
-      run: |
-        bash ${GITHUB_WORKSPACE}/workspace/${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
-      working-directory: ${{ steps.pwd.outputs.workspace-folder }}
-      continue-on-error: true
 
     - name: Building recovery
       run: |
