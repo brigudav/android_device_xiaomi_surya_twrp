@@ -125,7 +125,7 @@ jobs:
     - name: Apply custom diff.patch
       if: github.event.inputs.APPLYPATCH == 'true'
       run: |
-        bash ${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
+        bash ./${{ github.event.inputs.DEVICE_PATH }}/patches/apply-patches.sh
       working-directory: workspace
       continue-on-error: true
 
