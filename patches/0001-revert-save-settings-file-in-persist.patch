@@ -1,0 +1,136 @@
+From 3024236bee44a2cb32c8eef7369bae722c11e204 Mon Sep 17 00:00:00 2001
+From: brigudav <alexvl1972@hotmail.com>
+Date: Sat, 17 Jun 2023 13:03:39 +1000
+Subject: [PATCH] persist settings: revert save settings file in persist
+ partition
+
+---
+ data.cpp           | 47 ++++++++++++++++++++++++++++++++++++++++++++++
+ data.hpp           |  2 ++
+ partition.cpp      |  2 ++
+ twrp-functions.cpp |  3 +++
+ twrp-functions.hpp |  1 +
+ 5 files changed, 55 insertions(+)
+
+diff --git a/data.cpp b/data.cpp
+index 59437c74..9f155a07 100755
+--- a/data.cpp
++++ b/data.cpp
+@@ -273,6 +273,44 @@ int DataManager::LoadValues(const string& filename)
+ 	return 0;
+ }
+ 
++int DataManager::LoadPersistValues(void)
++{
++	static bool loaded = false;
++	string dev_id;
++
++	// Only run this function once, and make sure normal settings file has not yet been read
++	if (loaded || !mBackingFile.empty() || !TWFunc::Path_Exists(PERSIST_SETTINGS_FILE))
++		return -1;
++
++	LOGINFO("Attempt to load settings from /persist settings file...\n");
++
++	if (!mInitialized)
++		SetDefaultValues();
++
++	GetValue("device_id", dev_id);
++	mPersist.SetFile(PERSIST_SETTINGS_FILE);
++	mPersist.SetFileVersion(FILE_VERSION);
++
++	// Read in the file, if possible
++	pthread_mutex_lock(&m_valuesLock);
++	mPersist.LoadValues();
++
++#ifndef TW_NO_SCREEN_TIMEOUT
++	blankTimer.setTime(mPersist.GetIntValue("tw_screen_timeout_secs"));
++#endif
++
++	update_tz_environment_variables();
++	TWFunc::Set_Brightness(GetStrValue("tw_brightness"));
++
++	pthread_mutex_unlock(&m_valuesLock);
++
++	/* Don't set storage nor backup paths this early */
++
++	loaded = true;
++
++	return 0;
++}
++
+ int DataManager::Flush()
+ {
+ 	return SaveValues();
+@@ -281,6 +319,15 @@ int DataManager::Flush()
+ int DataManager::SaveValues()
+ {
+ #ifndef TW_OEM_BUILD
++	if (PartitionManager.Mount_By_Path("/persist", false)) {
++		mPersist.SetFile(PERSIST_SETTINGS_FILE);
++		mPersist.SetFileVersion(FILE_VERSION);
++		pthread_mutex_lock(&m_valuesLock);
++		mPersist.SaveValues();
++		pthread_mutex_unlock(&m_valuesLock);
++		LOGINFO("Saved settings file values to %s\n", PERSIST_SETTINGS_FILE);
++	}
++
+ 	if (mBackingFile.empty())
+ 		return -1;
+ 
+diff --git a/data.hpp b/data.hpp
+index d89966e6..808e3122 100755
+--- a/data.hpp
++++ b/data.hpp
+@@ -23,6 +23,8 @@
+ #include <pthread.h>
+ #include "infomanager.hpp"
+ 
++#define PERSIST_SETTINGS_FILE  "/persist/.twrps"
++
+ using namespace std;
+ 
+ class DataManager
+diff --git a/partition.cpp b/partition.cpp
+index 7e0cb2c5..55624389 100755
+--- a/partition.cpp
++++ b/partition.cpp
+@@ -640,6 +640,8 @@ bool TWPartition::Process_Fstab_Line(const char *fstab_line, bool Display_Error,
+ 	if (Mount_Point == "/persist" && Can_Be_Mounted) {
+ 		bool mounted = Is_Mounted();
+ 		if (mounted || Mount(false)) {
++			// Read the backup settings file
++			DataManager::LoadPersistValues();
+ 			TWFunc::Fixup_Time_On_Boot("/persist/time/");
+ 			if (!mounted)
+ 				UnMount(false);
+diff --git a/twrp-functions.cpp b/twrp-functions.cpp
+index c19494ec..85a78f37 100755
+--- a/twrp-functions.cpp
++++ b/twrp-functions.cpp
+@@ -1265,8 +1265,11 @@ int TWFunc::stream_adb_backup(string &Restore_Name) {
+ std::string TWFunc::get_log_dir() {
+ 	if (PartitionManager.Find_Partition_By_Path(CACHE_LOGS_DIR) == NULL) {
+ 		if (PartitionManager.Find_Partition_By_Path(DATA_LOGS_DIR) == NULL) {
++			if (PartitionManager.Find_Partition_By_Path(PERSIST_LOGS_DIR) == NULL) {
+ 			LOGINFO("Unable to find a directory to store TWRP logs.");
+ 			return "";
++			}
++			return PERSIST_LOGS_DIR;
+ 		} else {
+ 			return DATA_LOGS_DIR;
+ 		}
+diff --git a/twrp-functions.hpp b/twrp-functions.hpp
+index 3fa2df62..5f223020 100755
+--- a/twrp-functions.hpp
++++ b/twrp-functions.hpp
+@@ -32,6 +32,7 @@ using namespace std;
+ 
+ #define CACHE_LOGS_DIR "/cache/" // For devices with a dedicated cache partition
+ #define DATA_LOGS_DIR "/data/"	 // For devices that do not have a dedicated cache partition
++#define PERSIST_LOGS_DIR "/persist/"  // For devices with neither cache or dedicated data partition
+ 
+ typedef enum
+ {
+-- 
+2.17.1
+
