@@ -115,7 +115,6 @@ jobs:
           
     - name: Repo Sync
       run: |
-        sed -i '/remove-project name="platform\/external\/gflags"/d' .repo/manifests/remove-minimal.xml
         repo sync -j$(nproc --all) --force-sync
       working-directory: workspace
       
