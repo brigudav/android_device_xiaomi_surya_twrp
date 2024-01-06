@@ -1,7 +1,4 @@
 #!/bin/bash
-cd $1/bootable/recovery
-for f in ../../device/xiaomi/surya/patches/*.patch
-do
-  patch -p1 < $f
-done
+cd ./bootable/recovery
+patch -p1 < ../../device/xiaomi/surya/patches/0001-revert-save-settings-file-in-persist.patch
 cd ../..
