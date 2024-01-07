@@ -1,11 +1,9 @@
-# android_device_xiaomi_surya_twrp
-For building TWRP for POCO X3 / X3 NFC (codenamed "karna / surya")
-
-TWRP device tree for POCO X3 (karna/surya)
+## Device Tree for building TWRP for POCO X3 NFC (karna/surya)
 
 ## Features
 
-Works:
+<details><summary>Works: - Click to open</summary>
+<p>
 
 - [X] ADB
 - [X] Decryption of /data (MIUI Android 12/Custom rom Android 12-13 FBEv1)
@@ -22,6 +20,9 @@ Works:
 - [X] Sideload (adb sideload update.zip)
 - [X] Reboot to bootloader/recovery/system/fasbootd
 - [X] F2FS/EXT4 Support, exFAT/NTFS where supported
+
+</p>
+</details>
 
 ## Compile
 
