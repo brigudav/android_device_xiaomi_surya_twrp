@@ -3,14 +3,6 @@ name: Recovery Build stock
 on:
   workflow_dispatch:
     inputs:
-      MANIFEST_TYPE:
-        description: 'MANIFEST_TYPE'
-        required: true
-        default: 'twrp'
-        type: choice
-        options:
-        - twrp
-        - omni
       MANIFEST_URL:
         description: 'MANIFEST_URL'
         required: true
@@ -91,12 +83,6 @@ jobs:
         distribution: 'zulu'
         java-version: '8'
 
-    - name: Setup SSH Keys
-      if: ${{ startsWith(github.event.inputs.MANIFEST_URL, 'git@github.com') }}
-      uses: webfactory/ssh-agent@v0.5.4
-      with:
-          ssh-private-key: |
-              ${{ secrets.SSH_PRIVATE_KEY }}
     - name: Install repo
       run: |
         mkdir ~/bin
@@ -130,15 +116,20 @@ jobs:
       with:
         swap-size-gb: 12
 
+    - name: Check Build Tree
+      uses: haya14busa/action-cond@v1
+      id: manifesttype
+      with:
+        cond: ${{ github.event.inputs.LIBRARY_BRANCH == 'twrp-11' || github.event.inputs.LIBRARY_BRANCH == 'twrp-12.1' }}
+        if_true: twrp
+        if_false: omni
+
     - name: Building recovery
       run: |
         cd ${GITHUB_WORKSPACE}/workspace
         export ALLOW_MISSING_DEPENDENCIES=true
         source build/envsetup.sh
-        git config --global user.name "brigudav"
-        git config --global user.email "alexvl1972@hotmail.com"
-        repopick 6840
-        lunch ${{ github.event.inputs.MANIFEST_TYPE }}_${{ github.event.inputs.DEVICE_NAME }}-eng
+        lunch ${{ steps.manifesttype.outputs.value }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         rm -rf .repo/
         make clean
         make ${{ github.event.inputs.DEVICE_TYPE }}image -j$(nproc --all)
