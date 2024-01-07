@@ -64,6 +64,7 @@ on:
 
 jobs:
   build:
+    name: Build TWRP by ${{ github.actor }}
     if: github.event.repository.owner.id == github.event.sender.id
     runs-on: ubuntu-20.04
     permissions:
@@ -128,12 +129,12 @@ jobs:
         git config --global user.email "alexvl1972@hotmail.com"
         repo init --depth=1 -u ${{ steps.manifest.outputs.value }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
       id: pwd
-          
+
     - name: Repo Sync
       run: |
         repo sync -j$(nproc --all) --force-sync
       working-directory: ${{ steps.pwd.outputs.wsdir }}
-      
+
     - name: Clone device tree
       run: |
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
