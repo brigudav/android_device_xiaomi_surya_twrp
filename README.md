@@ -1,14 +1,12 @@
-# android_device_xiaomi_surya_twrp
-For building TWRP for POCO X3 / X3 NFC (codenamed "karna / surya")
-
-TWRP device tree for POCO X3 (karna/surya)
+## Device Tree for building TWRP for POCO X3 NFC (karna/surya)
 
 ## Features
 
-Works:
+<details><summary>Works: - Click to open</summary>
+<p>
 
 - [X] ADB
-- [X] Decryption of /data
+- [X] Decryption of /data (MIUI Android 12/Custom rom Android 12-13 FBEv1)
 - [X] Screen brightness settings
 - [X] Vibration support
 - [X] Correct screenshot
@@ -23,19 +21,22 @@ Works:
 - [X] Reboot to bootloader/recovery/system/fasbootd
 - [X] F2FS/EXT4 Support, exFAT/NTFS where supported
 
+</p>
+</details>
+
 ## Compile
 
 First checkout minimal twrp with aosp tree:
 
 ```
-repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-11
+repo init -u https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git -b twrp-12.1
 repo sync
 ```
 
 Then add these projects to .repo/manifest.xml:
 
 ```xml
-<project path="device/xiaomi/surya" name="brigudav/android_device_xiaomi_surya_twrp" remote="github" revision="android-11" />
+<project path="device/xiaomi/surya" name="brigudav/android_device_xiaomi_surya_twrp" remote="github" revision="android-12.1" />
 ```
 
 Finally execute these:
