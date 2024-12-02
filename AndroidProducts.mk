@@ -1,5 +1,6 @@
 #
-# Copyright (C) 2021 The TWRP Open-Source Project
+# Copyright 2018 The Android Open Source Project
+# Copyright 2014-2022 The Team Win LLC
 #
 # SPDX-License-Identifier: Apache-2.0
 #

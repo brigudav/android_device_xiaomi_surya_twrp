@@ -1,14 +1,14 @@
 #
-# Copyright (C) 2021 The TWRP Open-Source Project
+# Copyright 2018 The Android Open Source Project
+# Copyright 2014-2024 The Team Win LLC
 #
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# Default device path
-DEVICE_PATH := device/$(BOARD_VENDOR)/$(TARGET_DEVICE)
-
 # Broken rules
 BUILD_BROKEN_DUP_RULES := true
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+BUILD_BROKEN_MISSING_REQUIRED_MODULES := true
 
 # Bootloader
 TARGET_BOOTLOADER_BOARD_NAME := sm6150
@@ -19,9 +19,6 @@ TARGET_USES_UEFI := true
 TARGET_BOARD_PLATFORM := sm6150
 TARGET_BOARD_PLATFORM_GPU := qcom-adreno618
 QCOM_BOARD_PLATFORMS += sm6150
-
-TARGET_USES_64_BIT_BINDER := true
-TARGET_SUPPORTS_64_BIT_APPS := true
 
 # Architecture
 TARGET_ARCH := arm64
@@ -42,20 +39,14 @@ ENABLE_SCHEDBOOST := true
 
 # Kernel
 BOARD_KERNEL_CMDLINE := \
-	console=ttyMSM0,115200n8 \
 	androidboot.hardware=qcom \
-	androidboot.console=ttyMSM0 \
 	androidboot.memcg=1 \
 	lpm_levels.sleep_disabled=1 \
-	video=vfb:640x400,bpp=32,memsize=3072000 \
 	msm_rtb.filter=0x237 \
 	service_locator.enable=1 \
 	androidboot.usbcontroller=a600000.dwc3 \
 	swiotlb=2048 \
 	androidboot.boot_devices=soc/1d84000.ufshc \
-	cgroup.memory=nokmem,nosocket \
-	androidboot.init_fatal_reboot_target=recovery \
-	androidboot.fastboot=1 \
 	androidboot.selinux=permissive
 
 BOARD_KERNEL_IMAGE_NAME    := Image
@@ -108,43 +99,27 @@ BOARD_MAIN_PARTITION_LIST := \
 	vendor \
 	product
 
-# System as root
-BOARD_ROOT_EXTRA_FOLDERS += \
-	bluetooth \
-	cache \
-	bt_firmware \
-	dsp \
-	firmware \
-	persist \
-	cust
-BOARD_SUPPRESS_SECURE_ERASE := true
-
 # File systems
 TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
+BOARD_USERDATAIMAGE_FILE_SYSTEM_TYPE := f2fs
 
 # Workaround for error copying vendor files to recovery ramdisk
-BOARD_PRODUCTIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_SYSTEM_EXTIMAGE_FILE_SYSTEM_TYPE := ext4
-BOARD_VENDORIMAGE_FILE_SYSTEM_TYPE := ext4
-TARGET_COPY_OUT_PRODUCT := product
-TARGET_COPY_OUT_SYSTEM_EXT := system_ext
-TARGET_COPY_OUT_VENDOR := vendor
+BOARD_PARTITION_LIST := $(call to-upper, $(BOARD_MAIN_PARTITION_LIST))
+$(foreach p, $(BOARD_PARTITION_LIST), $(eval BOARD_$(p)IMAGE_FILE_SYSTEM_TYPE := ext4))
+$(foreach p, $(BOARD_PARTITION_LIST), $(eval TARGET_COPY_OUT_$(p) := $(call to-lower, $(p))))
 
 # Extras props
 TARGET_SYSTEM_PROP += $(DEVICE_PATH)/system.prop
 
-# Assert
-TARGET_OTA_ASSERT_DEVICE := $(PRODUCT_RELEASE_NAME)
-
 # Crypto
-PLATFORM_VERSION := 127
+PLATFORM_VERSION := 99.87.36
+PLATFORM_VERSION_LAST_STABLE := $(PLATFORM_VERSION)
 TW_INCLUDE_CRYPTO := true
 TW_INCLUDE_CRYPTO_FBE := true
 TW_INCLUDE_FBE_METADATA_DECRYPT := true
-PLATFORM_SECURITY_PATCH := 2127-12-31
+PLATFORM_SECURITY_PATCH := 2099-12-31
 VENDOR_SECURITY_PATCH := $(PLATFORM_SECURITY_PATCH)
-TW_USE_FSCRYPT_POLICY := 1
 
 BOARD_USES_METADATA_PARTITION := true
 BOARD_ROOT_EXTRA_FOLDERS += metadata
@@ -162,18 +137,16 @@ TARGET_USE_CUSTOM_LUN_FILE_PATH := /config/usb_gadget/g1/functions/mass_storage.
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 #TW_EXTRA_LANGUAGES := true
 TW_INCLUDE_NTFS_3G := true
-TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
+TW_BRIGHTNESS_PATH := /sys/class/backlight/panel0-backlight/brightness
+TW_MAX_BRIGHTNESS := 4095
 TW_DEFAULT_BRIGHTNESS := 1200
 TW_Y_OFFSET := 91
 TW_H_OFFSET := -91
 TARGET_USES_MKE2FS := true
 TW_NO_SCREEN_BLANK := true
 TW_EXCLUDE_APEX := true
+TW_USE_TOOLBOX := true
 TW_SUPPORT_INPUT_1_2_HAPTICS := true
-
-# TWRP tools
-TW_INCLUDE_RESETPROP := true
-TW_INCLUDE_REPACKTOOLS := true
 
 # The path to a temperature sensor
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone19/temp"
@@ -184,5 +157,12 @@ TWRP_INCLUDE_LOGCAT := true
 
 TW_QCOM_ATS_OFFSET := 1643101352000
 
-TW_EXCLUDE_LPDUMP := true
-TW_EXCLUDE_LPTOOLS := true
+# TWRP tools
+TW_INCLUDE_RESETPROP := true
+TW_INCLUDE_REPACKTOOLS := true
+TW_INCLUDE_LPDUMP := true
+TW_INCLUDE_LPTOOLS := true
+TW_INCLUDE_PYTHON := true
+
+TW_PREPARE_DATA_MEDIA_EARLY := true
+TW_FRAMERATE := 90
