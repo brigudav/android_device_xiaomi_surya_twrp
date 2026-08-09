@@ -98,11 +98,12 @@ jobs:
           sudo ln -sf ~/bin/repo /usr/bin/repo
 
       - name: Initialize Source Tree Workspace
+        id: pwd
         run: |
           sudo ln -sf /usr/bin/python3 /usr/bin/python
-          mkdir twrp
+          mkdir -p twrp
           cd twrp
-          echo "wsdir=$(pwd)" >> $GITHUB_OUTPUT
+          echo "wsdir=$PWD" >> $GITHUB_OUTPUT
           git config --global user.name "Amazeble"
           git config --global user.email "amazeble@example.com"
           
@@ -113,7 +114,6 @@ jobs:
           fi
           
           repo init --depth=1 --no-repo-verify -u "$MANIFEST_URL" -b ${{ github.event.inputs.MANIFEST_BRANCH }}
-        id: pwd
 
       - name: Sync Source Code
         run: |
