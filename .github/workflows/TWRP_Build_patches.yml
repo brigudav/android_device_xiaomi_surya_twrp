@@ -13,7 +13,7 @@ on:
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
-        default: 'https://github.com'
+        default: 'https://github.com/Amazeble/android_device_xiaomi_surya_twrp/'
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
