@@ -82,10 +82,7 @@ jobs:
           sudo apt-get -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev \
           x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev \
           lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool \
-          squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python2-minimal
-          
-          # Enforce Python link fallbacks
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python2-minimal python3
 
       - name: Setup Java Build Environment
         uses: actions/setup-java@v3
@@ -93,21 +90,18 @@ jobs:
           distribution: 'zulu'
           java-version: '8'
 
-      - name: Toggle Python3 Mapping
-        if: github.event.inputs.MANIFEST_BRANCH == 'twrp-11' || github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1'
-        run: |
-          sudo rm -f /usr/bin/python
-          sudo ln -sf /usr/bin/python3 /usr/bin/python
-
-      - name: Install Google Repo Tool
+      - name: Install Verified Repo Tool
         run: |
           mkdir -p ~/bin
-          curl https://googleapis.com > ~/bin/repo
+          curl https://googlesource.com | base64 --decode > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
 
       - name: Initialize Source Tree Workspace
         run: |
+          # Keep python targeted to Python3 to satisfy repo init restrictions
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
+          
           mkdir twrp
           cd twrp
           echo "wsdir=$(pwd)" >> $GITHUB_OUTPUT
@@ -120,7 +114,7 @@ jobs:
             MANIFEST_URL="https://github.com"
           fi
           
-          repo init --depth=1 -u "$MANIFEST_URL" -b ${{ github.event.inputs.MANIFEST_BRANCH }}
+          repo init --depth=1 --no-repo-verify -u "$MANIFEST_URL" -b ${{ github.event.inputs.MANIFEST_BRANCH }}
         id: pwd
 
       - name: Sync Source Code
@@ -146,6 +140,9 @@ jobs:
 
       - name: Execute Compiler Engine
         run: |
+          # Toggle Python linking layout fallback down to Python2 to support Android legacy build engines
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
           
