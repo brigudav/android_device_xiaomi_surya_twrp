@@ -99,9 +99,7 @@ jobs:
 
       - name: Initialize Source Tree Workspace
         run: |
-          # Keep python targeted to Python3 to satisfy repo init restrictions
           sudo ln -sf /usr/bin/python3 /usr/bin/python
-          
           mkdir twrp
           cd twrp
           echo "wsdir=$(pwd)" >> $GITHUB_OUTPUT
@@ -109,7 +107,7 @@ jobs:
           git config --global user.email "amazeble@example.com"
           
           if [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-11" ] || [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-12.1" ]; then
-            MANIFEST_URL="https://github.com"
+            MANIFEST_URL="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git"
           else
             MANIFEST_URL="https://github.com"
           fi
@@ -124,6 +122,7 @@ jobs:
 
       - name: Repopick Tree Patches
         run: |
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
           source build/envsetup.sh
           repopick 7203
         working-directory: ${{ steps.pwd.outputs.wsdir }}
@@ -140,9 +139,7 @@ jobs:
 
       - name: Execute Compiler Engine
         run: |
-          # Toggle Python linking layout fallback down to Python2 to support Android legacy build engines
           sudo ln -sf /usr/bin/python2 /usr/bin/python
-          
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
           
