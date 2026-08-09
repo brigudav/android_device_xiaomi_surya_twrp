@@ -66,23 +66,47 @@ jobs:
   build:
     name: Build TWRP by ${{ github.actor }}
     if: github.event.repository.owner.id == github.event.sender.id
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
-    container:
-      image: ghcr.io/sushrut1101/docker-tw外:latest  # Uses a pre-built Android build container sandbox
     steps:
       - name: Check Out
         uses: actions/checkout@v4
 
-      - name: Install repo tool
+      - name: Cleanup Actions Workspace
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Prepare Local Compilation Environment
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev \
+          x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev \
+          lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool \
+          squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python2-minimal
+          
+          # Enforce Python link fallbacks
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
+
+      - name: Setup Java Build Environment
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Toggle Python3 Mapping
+        if: github.event.inputs.MANIFEST_BRANCH == 'twrp-11' || github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1'
+        run: |
+          sudo rm -f /usr/bin/python
+          sudo ln -sf /usr/bin/python3 /usr/bin/python
+
+      - name: Install Google Repo Tool
         run: |
           mkdir -p ~/bin
           curl https://googleapis.com > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
 
-      - name: Initialize repo tree
+      - name: Initialize Source Tree Workspace
         run: |
           mkdir twrp
           cd twrp
@@ -90,7 +114,6 @@ jobs:
           git config --global user.name "Amazeble"
           git config --global user.email "amazeble@example.com"
           
-          # Dynamic manifest selection
           if [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-11" ] || [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-12.1" ]; then
             MANIFEST_URL="https://github.com"
           else
@@ -105,23 +128,23 @@ jobs:
           repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
-      - name: Repopick Patches
+      - name: Repopick Tree Patches
         run: |
           source build/envsetup.sh
           repopick 7203
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
-      - name: Clone device tree
+      - name: Clone Custom Surya Device Tree
         run: |
           git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
-      - name: Set Swap Space
+      - name: Set Server Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 12
 
-      - name: Compiling Image
+      - name: Execute Compiler Engine
         run: |
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
@@ -137,20 +160,20 @@ jobs:
           make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
-      - name: Set Output Variables
+      - name: Set Build Parameters
         run: |
           echo "date=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
           echo "Outdir=${GITHUB_WORKSPACE}/twrp/out/target/product/${{ github.event.inputs.DEVICE_NAME }}" >> $GITHUB_OUTPUT
         id: var
 
-      - name: Compress Output Binary
+      - name: Pack Output Asset
         run: |
           cd ${{ steps.var.outputs.Outdir }}
           zip -9 twrp-${{ github.event.inputs.DEVICE_NAME }}-${{ steps.var.outputs.date }}.zip ${{ github.event.inputs.BUILD_TARGET }}.img
           echo "name=$(find * -name *.zip -type f)" >> $GITHUB_OUTPUT
         id: zipname
 
-      - name: Publish to GitHub Releases
+      - name: Publish Compiled Zip Asset to Releases
         if: github.event.inputs.PUBLISH == 'true'
         uses: softprops/action-gh-release@v1
         with:
