@@ -71,6 +71,10 @@ jobs:
     - name: Cleanup
       uses: rokibhasansagar/slimhub_actions@main
 
+    - name: Create Workspace Directory
+      run: |
+        mkdir -p ${GITHUB_WORKSPACE}/workspace
+
     - name: Prepare the environment
       run: |
         sudo apt update
@@ -93,23 +97,21 @@ jobs:
     - name: Init Repo
       run: |
         export HOME=${GITHUB_WORKSPACE}
-        cd ${GITHUB_WORKSPACE}
-        mkdir ${GITHUB_WORKSPACE}/workspace
-        cd ${GITHUB_WORKSPACE}/workspace
         git config --global user.name "brigudav"
         git config --global user.email "alexvl1972@hotmail.com"
         repo init --depth=1 -u ${{ github.event.inputs.MANIFEST_URL }} -b ${{ github.event.inputs.LIBRARY_BRANCH }}
+      working-directory: ${{ GITHUB_WORKSPACE }}/workspace
 
     - name: Repo Sync
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
         repo sync -j$(nproc --all)
         ls -al
+      working-directory: ${{ GITHUB_WORKSPACE }}/workspace
 
     - name: Clone Device Tree
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
         git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
+      working-directory: ${{ GITHUB_WORKSPACE }}/workspace
 
     - name: Set Swap Space
       uses: pierotofy/set-swap-space@master
@@ -126,13 +128,13 @@ jobs:
 
     - name: Building recovery
       run: |
-        cd ${GITHUB_WORKSPACE}/workspace
         export ALLOW_MISSING_DEPENDENCIES=true
         source build/envsetup.sh
         lunch ${{ steps.manifesttype.outputs.value }}_${{ github.event.inputs.DEVICE_NAME }}-eng
         rm -rf .repo/
         make clean
         make ${{ github.event.inputs.DEVICE_TYPE }}image -j$(nproc --all)
+      working-directory: ${{ GITHUB_WORKSPACE }}/workspace
 
     - name: Set Variables
       run: |
