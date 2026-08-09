@@ -118,7 +118,11 @@ jobs:
         run: |
           sudo ln -sf /usr/bin/python3 /usr/bin/python || true
           source build/envsetup.sh
-          echo "Skipping repopick 7203 due to SSL certificate issues with gerrit.twrp.me"
+          # Patch repopick.py to ignore SSL certificate verification
+          sed -i 's/requests.get(url)/requests.get(url, verify=False)/g' vendor/twrp/build/tools/repopick.py
+          # Disable SSL warnings
+          export PYTHONWARNINGS="ignore:Unverified HTTPS request"
+          repopick 7203
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
       - name: Clone Custom Surya Device Tree
