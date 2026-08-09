@@ -15,7 +15,7 @@ on:
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
-        default: 'https://github.com/Amazeble/android_device_xiaomi_surya_twrp'
+        default: 'https://github.com'
       DEVICE_TREE_BRANCH:
         description: 'DEVICE_TREE_BRANCH'
         required: true
@@ -69,65 +69,38 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    container:
+      image: ghcr.io/sushrut1101/docker-tw外:latest  # Uses a pre-built Android build container sandbox
     steps:
       - name: Check Out
         uses: actions/checkout@v4
 
-      - name: Cleanup
-        uses: rokibhasansagar/slimhub_actions@main
-
-      - name: Configure Legacy Software Repositories
+      - name: Install repo tool
         run: |
-          echo "deb http://ubuntu.com focal main universe" | sudo tee -a /etc/apt/sources.list
-          sudo apt update -qq
-
-      - name: Prepare the environment
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev \
-          x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev \
-          lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool \
-          squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python2-minimal
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
-
-      - name: Install OpenJDK
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '8'
-
-      - name: Switch to Python3
-        if: github.event.inputs.MANIFEST_BRANCH == 'twrp-11' || github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1'
-        run: |
-          sudo rm -f /usr/bin/python
-          sudo ln -sf /usr/bin/python3 /usr/bin/python
-
-      - name: Check Manifest Branch
-        uses: haya14busa/action-cond@v1
-        id: manifest
-        with:
-          cond: ${{ github.event.inputs.MANIFEST_BRANCH == 'twrp-11' || github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1' }}
-          if_true: https://github.com
-          if_false: https://github.com
-
-      - name: Install repo
-        run: |
-          mkdir ~/bin
+          mkdir -p ~/bin
           curl https://googleapis.com > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
 
-      - name: Initialize repo
+      - name: Initialize repo tree
         run: |
           mkdir twrp
           cd twrp
           echo "wsdir=$(pwd)" >> $GITHUB_OUTPUT
           git config --global user.name "Amazeble"
-          git config --global user.email "amazeble@gmail.com"
-          repo init --depth=1 -u ${{ steps.manifest.outputs.value }} -b ${{ github.event.inputs.MANIFEST_BRANCH }}
+          git config --global user.email "amazeble@example.com"
+          
+          # Dynamic manifest selection
+          if [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-11" ] || [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-12.1" ]; then
+            MANIFEST_URL="https://github.com"
+          else
+            MANIFEST_URL="https://github.com"
+          fi
+          
+          repo init --depth=1 -u "$MANIFEST_URL" -b ${{ github.event.inputs.MANIFEST_BRANCH }}
         id: pwd
 
-      - name: Repo Sync
+      - name: Sync Source Code
         run: |
           repo sync -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
         working-directory: ${{ steps.pwd.outputs.wsdir }}
@@ -143,40 +116,41 @@ jobs:
           git clone ${{ github.event.inputs.DEVICE_TREE_URL }} -b ${{ github.event.inputs.DEVICE_TREE_BRANCH }} ./${{ github.event.inputs.DEVICE_PATH }}
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
-      - name: Check Build Tree
-        uses: haya14busa/action-cond@v1
-        id: buildtree
-        with:
-          cond: ${{ github.event.inputs.MANIFEST_BRANCH == 'twrp-11' || github.event.inputs.MANIFEST_BRANCH == 'twrp-12.1' }}
-          if_true: twrp
-          if_false: omni
-
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
           swap-size-gb: 12
 
-      - name: Building recovery
+      - name: Compiling Image
         run: |
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
-          lunch ${{ steps.buildtree.outputs.value }}_${{ github.event.inputs.DEVICE_NAME }}-eng && make clean && make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
+          
+          if [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-11" ] || [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-12.1" ]; then
+            TREE_TYPE="twrp"
+          else
+            TREE_TYPE="omni"
+          fi
+          
+          lunch ${TREE_TYPE}_${{ github.event.inputs.DEVICE_NAME }}-eng
+          make clean
+          make ${{ github.event.inputs.BUILD_TARGET }}image -j$(nproc --all)
         working-directory: ${{ steps.pwd.outputs.wsdir }}
 
-      - name: Set Variables
+      - name: Set Output Variables
         run: |
-          echo "date=$(TZ=Asia/Kuala_Lumpur date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+          echo "date=$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
           echo "Outdir=${GITHUB_WORKSPACE}/twrp/out/target/product/${{ github.event.inputs.DEVICE_NAME }}" >> $GITHUB_OUTPUT
         id: var
 
-      - name: Add Img to Zip
+      - name: Compress Output Binary
         run: |
           cd ${{ steps.var.outputs.Outdir }}
           zip -9 twrp-${{ github.event.inputs.DEVICE_NAME }}-${{ steps.var.outputs.date }}.zip ${{ github.event.inputs.BUILD_TARGET }}.img
           echo "name=$(find * -name *.zip -type f)" >> $GITHUB_OUTPUT
         id: zipname
 
-      - name: Publish to GitHub
+      - name: Publish to GitHub Releases
         if: github.event.inputs.PUBLISH == 'true'
         uses: softprops/action-gh-release@v1
         with:
