@@ -10,8 +10,6 @@ on:
         type: choice
         options:
           - twrp-12.1
-          - twrp-11
-          - twrp-9.0
       DEVICE_TREE_URL:
         description: 'DEVICE_TREE_URL'
         required: true
@@ -82,7 +80,7 @@ jobs:
           sudo apt-get -y install gperf gcc-multilib gcc-10-multilib g++-multilib g++-10-multilib libc6-dev lib32ncurses5-dev \
           x11proto-core-dev libx11-dev tree lib32z-dev libgl1-mesa-dev libxml2-utils xsltproc bc ccache lib32readline-dev \
           lib32z1-dev liblz4-tool libncurses5-dev libsdl1.2-dev libwxgtk3.0-gtk3-dev libxml2 lzop pngcrush schedtool \
-          squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python2-minimal python3
+          squashfs-tools imagemagick libbz2-dev lzma ncftp qemu-user-static libstdc++-10-dev libncurses5 python3
 
       - name: Setup Java Build Environment
         uses: actions/setup-java@v3
@@ -100,18 +98,14 @@ jobs:
       - name: Initialize Source Tree Workspace
         id: pwd
         run: |
-          sudo ln -sf /usr/bin/python3 /usr/bin/python
+          sudo ln -sf /usr/bin/python3 /usr/bin/python || true
           mkdir -p twrp
           cd twrp
           echo "wsdir=$PWD" >> $GITHUB_OUTPUT
           git config --global user.name "Amazeble"
           git config --global user.email "amazeble@example.com"
           
-          if [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-11" ] || [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-12.1" ]; then
-            MANIFEST_URL="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git"
-          else
-            MANIFEST_URL="https://github.com"
-          fi
+          MANIFEST_URL="https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git"
           
           repo init --depth=1 --no-repo-verify -u "$MANIFEST_URL" -b ${{ github.event.inputs.MANIFEST_BRANCH }}
 
@@ -122,7 +116,7 @@ jobs:
 
       - name: Repopick Tree Patches
         run: |
-          sudo ln -sf /usr/bin/python3 /usr/bin/python
+          sudo ln -sf /usr/bin/python3 /usr/bin/python || true
           source build/envsetup.sh
           repopick 7203
         working-directory: ${{ steps.pwd.outputs.wsdir }}
@@ -139,15 +133,11 @@ jobs:
 
       - name: Execute Compiler Engine
         run: |
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
+          sudo ln -sf /usr/bin/python3 /usr/bin/python || true
           source build/envsetup.sh
           export ALLOW_MISSING_DEPENDENCIES=true
           
-          if [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-11" ] || [ "${{ github.event.inputs.MANIFEST_BRANCH }}" = "twrp-12.1" ]; then
-            TREE_TYPE="twrp"
-          else
-            TREE_TYPE="omni"
-          fi
+          TREE_TYPE="twrp"
           
           lunch ${TREE_TYPE}_${{ github.event.inputs.DEVICE_NAME }}-eng
           make clean
