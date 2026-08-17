@@ -49,3 +49,8 @@ PRODUCT_BUILD_PROP_OVERRIDES += \
 
 PRODUCT_PROPERTY_OVERRIDES += \
 	ro.product.device=$(PRODUCT_RELEASE_NAME)
+
+# Explicitly force-inject Novatek screen replacement drivers
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/recovery/root/vendor/firmware/novatek_ts_huaxing_fw.bin:root/vendor/firmware/novatek_ts_huaxing_fw.bin
+
